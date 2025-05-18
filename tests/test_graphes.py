@@ -20,7 +20,7 @@ def tester_creation():
 
 def tester_analyse():
     """Teste le calcul des degrés et super-propagateurs"""
-    G = creer_graphe(n=10, p=0.2)
+    G = creer_graphe(n:=10, p:=0.2)
     degres = calculer_degres(G)
     assert isinstance(degres, dict), "Doit retourner un dictionnaire"
     supers = super_propagateurs(G, top=2)
