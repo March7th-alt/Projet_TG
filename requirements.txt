@@ -1,0 +1,3 @@
+networkx # Pour les graphes
+matplotlib # Pour les visuels
+tkinter # Pour l'interface
