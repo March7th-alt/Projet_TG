@@ -1,0 +1,15 @@
+# Environnements virtuels
+.venv/
+venv/
+
+# Fichiers de compilation Python
+__pycache__/
+*.py[cod]
+
+# Environnements IDE
+.idea/
+.vscode/
+
+# Fichiers de données
+*.csv
+*.json

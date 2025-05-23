@@ -1,3 +1,10 @@
-networkx # Pour les graphes
-matplotlib # Pour les visuels
-tkinter # Pour l'interface
+# Bibliothèques principales
+networkx        # Pour la manipulation des graphes
+matplotlib     # Pour les visualisations
+numpy       # Pour les calculs matriciels
+
+# Interface graphique
+tkinter     # inclus avec Python
+
+# Tests
+pytest       # Framework de tests
