@@ -1,13 +1,15 @@
-# Projet_TG
+# PROJET_TG - Simulation de propagation épidémique sur réseaux sociaux
 
-# Simulation de Grippe (Graphes)
+## Description
+Ce projet modélise la propagation d'une épidémie dans un réseau social en utilisant la théorie des graphes.
 
-## Fonctionnalités Implémentées
-- ✅ Génération de graphes aléatoires
-- ✅ Calcul des degrés des nœuds
-- ✅ Identification des super-propagateurs
-- ✅ Visualisation (sain=bleu, infecté=rouge)
+## Fonctionnalités
+- Création de réseaux sociaux aléatoires
+- Simulation de propagation avec patient zéro
+- Identification des super-propagateurs
+- Stratégies de vaccination optimale
+- Visualisation interactive
 
-## Comment Lancer
+## Installation
 ```bash
-python interface/app_tkinter.py
+pip install -r requirements.txt
