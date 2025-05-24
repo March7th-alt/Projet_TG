@@ -56,6 +56,12 @@ class ControlPanel(ttk.Frame):
         ttk.Button(algo_frame, text="Afficher Degrés", command=self.controller.afficher_degres).pack(fill=tk.X, padx=5, pady=2)
         ttk.Button(algo_frame, text="Trouver Cycle Eulerien", command=self.controller.trouver_cycle_eulerien).pack(fill=tk.X, padx=5, pady=2)
         ttk.Button(algo_frame, text="Trouver Chemin Eulerien", command=self.controller.trouver_chemin_eulerien).pack(fill=tk.X, padx=5, pady=2)
+        
+        # Nouveaux boutons pour les fonctions de propagation
+        ttk.Button(algo_frame, text="Interactions Minimales", 
+                  command=self.demander_parametres_interactions).pack(fill=tk.X, padx=5, pady=2)
+        ttk.Button(algo_frame, text="Trouver Super Contaminateur", 
+                  command=self.controller.trouver_super_contaminateur).pack(fill=tk.X, padx=5, pady=2)
 
         # Chemin de longueur k
         k_frame = ttk.LabelFrame(self, text="Chemin de longueur k")
@@ -81,6 +87,30 @@ class ControlPanel(ttk.Frame):
 
         self.info_label = ttk.Label(info_frame, text="Ordre du graphe: 0")
         self.info_label.pack(pady=5)
+
+    def demander_parametres_interactions(self):
+        """Ouvre une boîte de dialogue pour les paramètres des interactions minimales"""
+        dialog = tk.Toplevel()
+        dialog.title("Interactions Minimales")
+        
+        ttk.Label(dialog, text="Sommet source:").grid(row=0, column=0, padx=5, pady=5)
+        source_entry = ttk.Entry(dialog)
+        source_entry.grid(row=0, column=1, padx=5, pady=5)
+        
+        ttk.Label(dialog, text="Sommet destination:").grid(row=1, column=0, padx=5, pady=5)
+        dest_entry = ttk.Entry(dialog)
+        dest_entry.grid(row=1, column=1, padx=5, pady=5)
+        
+        def calculer():
+            try:
+                source = int(source_entry.get())
+                destination = int(dest_entry.get())
+                self.controller.calculer_interactions_minimales(source, destination)
+                dialog.destroy()
+            except ValueError:
+                messagebox.showerror("Erreur", "Veuillez entrer des numéros valides")
+        
+        ttk.Button(dialog, text="Calculer", command=calculer).grid(row=2, columnspan=2, pady=10)
 
     def supprimer_sommet_specifique(self):
         """Gère la suppression d'un sommet spécifique"""
