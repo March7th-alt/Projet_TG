@@ -214,6 +214,54 @@ def minimum_time_to_infection(graph: Dict[int, List[int]],
     return None  # Target not reachable
 
 
+def simulate_transmission_flows(graph: Dict[int, List[int]], 
+                               initial_infected: List[int], 
+                               steps: int = 10,
+                               infection_prob: float = 0.5,
+                               recovery_prob: float = 0.2) -> List[Dict[int, str]]:
+    """
+    Question 17: Simulate transmission flows over multiple time steps.
+    
+    Args:
+        graph: Adjacency list representing the contact network
+        initial_infected: List of initially infected individuals
+        steps: Number of time steps to simulate
+        infection_prob: Probability of transmission per contact
+        recovery_prob: Probability an infected individual recovers and becomes immune
+        
+    Returns:
+        List of state dictionaries for each time step
+    """
+    simulation_history = []
+    
+    # Initialize states
+    states = {node: 'healthy' for node in graph}
+    for node in initial_infected:
+        if node in states:
+            states[node] = 'infected'
+    simulation_history.append(states.copy())
+    
+    for _ in range(1, steps):
+        new_states = states.copy()
+        
+        # Process recovery and immunity
+        for node in graph:
+            if states[node] == 'infected':
+                if random.random() < recovery_prob:
+                    new_states[node] = 'immune'
+        
+        # Process new infections
+        for node in graph:
+            if states[node] == 'infected':
+                for neighbor in graph.get(node, []):
+                    if states[neighbor] == 'healthy' and random.random() < infection_prob:
+                        new_states[neighbor] = 'infected'
+        
+        states = new_states
+        simulation_history.append(states.copy())
+    
+    return simulation_history
+
 #test:
 
 ma = [
