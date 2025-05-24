@@ -261,31 +261,3 @@ def simulate_transmission_flows(graph: Dict[int, List[int]],
         simulation_history.append(states.copy())
     
     return simulation_history
-
-#test:
-
-ma = [
-  [0, 1, 1, 1, 0],
-  [1, 0, 1, 0, 0], 
-  [1, 1, 0, 1, 0],
-  [1, 0, 1, 0, 1],
-  [0, 0, 0, 1, 0]
-]
-
-dic = {
-    0: [1, 2, 3],
-    1: [0, 2],
-    2: [0, 1, 3],
-    3: [0, 2, 4],
-    4: [3],
-    5: []
-}
-
-
-minimum_interactions(ma, 4, 4)
-
-print(super_contaminateur(ma))
-print(assign_risk_states(dic, [0]))
-print(detect_isolated_groups(dic))
-print(minimum_time_to_infection(dic, [0], 4))
-

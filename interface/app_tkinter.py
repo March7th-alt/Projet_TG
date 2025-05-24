@@ -159,18 +159,26 @@ class GrapheApp:
 
     # ===== NEW: Simulation Methods =====
     def definir_patient_zero(self):
-        """Set patient zero from the entry field (NEW VERSION)"""
-        node = self.control_panel.get_patient_zero_input()
-        if node is not None:
+        """Fixed version with correct method names"""
+        if not hasattr(self, 'root') or not tk._default_root:
+            return
+                
+        try:
+            node = int(self.control_panel.patient_zero_entry.get())
             if node < 0 or node >= self.graphe.ordre:
-                messagebox.showerror("Erreur", f"Le sommet {node} n'existe pas")
+                self.root.after(0, messagebox.showerror, "Erreur", f"Le sommet {node} n'existe pas")
                 return
+                    
             # Reset previous patient zero if exists
             if hasattr(self, 'patient_zero') and self.patient_zero is not None:
-                self.graph_widget.reset_node_color(self.patient_zero)
+                self.root.after(0, self.graph_widget.update_node_color, self.patient_zero, "skyblue")
+                    
             self.patient_zero = node
-            self.graph_widget.highlight_node(node, "red")
-            self.control_panel.update_info_label(f"Patient Zéro: Sommet {node}")
+            self.root.after(0, self.graph_widget.update_node_color, node, "red")
+            self.root.after(0, self.control_panel.update_info_label, f"Patient Zéro: Sommet {node}")
+            
+        except ValueError:
+            self.root.after(0, messagebox.showerror, "Erreur", "Veuillez entrer un numéro valide")
 
     def set_patient_zero(self, node):
         """Set the selected node as patient zero"""
@@ -257,15 +265,18 @@ class GrapheApp:
         self.control_panel.enable_simulation_controls()
 
     def reset_simulation(self):
-        """Reset the simulation state"""
+        """Fixed reset using update_node_color"""
         self.stop_simulation()
-        if self.patient_zero is not None:
-            self.graph_widget.reset_node_color(self.patient_zero)
+        if hasattr(self, 'patient_zero') and self.patient_zero is not None:
+            self.root.after(0, self.graph_widget.update_node_color, self.patient_zero, "skyblue")
             self.patient_zero = None
-        # Reset all nodes to healthy (blue)
-        for node in range(self.graphe.ordre):
-            self.graph_widget.update_node_color(node, "blue")
-        self.control_panel.update_info_label("Prêt")
+                
+        if hasattr(self, 'graphe'):
+            for node in range(self.graphe.ordre):
+                self.root.after(0, self.graph_widget.update_node_color, node, "skyblue")
+                    
+        if hasattr(self, 'control_panel'):
+            self.root.after(0, self.control_panel.update_info_label, "Prêt")
 
 if __name__ == "__main__":
     root = tk.Tk()
