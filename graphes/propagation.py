@@ -2,46 +2,43 @@ from collections import deque, defaultdict
 import random
 from typing import Dict, List, Tuple, Optional, Set
 
-def minimum_interactions(matrice_adj: List[List[int]], source: int, destination: int) -> None:
+def minimum_interactions(matrice_adj: List[List[int]], source: int, destination: int) -> Tuple[int, List[int]]:
   
-  """
-    Question 12: Une fonction permettant de déterminer combien dinteractions suffisent à propager les
-    virus dun individu à un autre.
-    graph: Dict[int, List[int]]: matrice d'adjacence de graphe
-    noeud1:int :Noeud source
-    noeud2:int :Noeud destination
-    -> Optional[int] : La fonctions retourne un eniter ou None
+    """
+        Question 12: Une fonction permettant de déterminer combien dinteractions suffisent à propager les
+        virus dun individu à un autre.
+        graph: Dict[int, List[int]]: matrice d'adjacence de graphe
+        noeud1:int :Noeud source
+        noeud2:int :Noeud destination
+        -> Optional[int] : La fonctions retourne un eniter ou None
 
-    en va trouver le plus cour chemin enter les deux noeuds et calculer le nombre des arcs entre eux;
-  """
+        en va trouver le plus cour chemin enter les deux noeuds et calculer le nombre des arcs entre eux;
+    """
 
-  if source == destination:
-    print(f"Interactions minimales: 0 (chemin: [{source}])")
-    return
+    if source == destination:
+        return (0, [source])
 
 
-  #Stocker le noeud courant, la distance entre le noeud courant et le source, et le chemin depuis le source vers le noeud courant
-  n = len(matrice_adj)
-  file = deque()
-  file.append((source, 0, [source]))
+    #Stocker le noeud courant, la distance entre le noeud courant et le source, et le chemin depuis le source vers le noeud courant
+    n = len(matrice_adj)
+    file = deque()
+    file.append((source, 0, [source]))
 
-  #Pour garder une trace sur les noeuds qu'on a deja visitée (on utilise le set pour eviter le passage par un noeud plusieur fois)
-  visitee = set()
-  visitee.add(source)
+    #Pour garder une trace sur les noeuds qu'on a deja visitée (on utilise le set pour eviter le passage par un noeud plusieur fois)
+    visitee = set()
+    visitee.add(source)
     
-  while file:
-    courant, distance, chemin= file.popleft()
-        
-    for voisin in range(n):
-      if matrice_adj[courant][voisin] == 1:
-        if voisin == destination:
-          print(f"Interactions minimales: {distance + 1} Chemin: {chemin + [voisin]})")
-          return
-        if voisin not in visitee:
-          visitee.add(voisin)
-          file.append((voisin, distance + 1, chemin+ [voisin]))
-  
-  print("Aucun chemin trouvé entre le source et la destination.")
+    while file:
+        courant, distance, chemin= file.popleft()
+            
+        for voisin in range(n):
+            if matrice_adj[courant][voisin] == 1:
+                if voisin == destination:
+                    return (distance + 1, chemin + [voisin])
+                if voisin not in visitee:
+                    visitee.add(voisin)
+                    file.append((voisin, distance + 1, chemin+ [voisin]))
+    return (-1, [])  # Aucun chemin trouvé
 
 
 def super_contaminateur(adj_matrix: List[List[int]]) -> List[int]:

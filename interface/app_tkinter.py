@@ -8,6 +8,7 @@ from graphes.core import Graphe
 from graphes.visualisation import VisualisationGraphe
 from interface.widgets.control_panel import ControlPanel
 from interface.widgets.graph_widget import GraphWidget
+from graphes.propagation import minimum_interactions, super_contaminateur
 
 class GrapheApp:
     def __init__(self, root):
@@ -152,6 +153,57 @@ class GrapheApp:
             self.visualisation = None
             self.graph_widget.clear()
             self.dessiner_graphe()
+
+    def calculer_interactions_minimales(self, source: int, destination: int):
+        """Calcule et affiche les interactions minimales entre deux sommets"""
+        try:
+            if not hasattr(self.graphe, 'matrice_adjacence'):
+                messagebox.showerror("Erreur", "Matrice d'adjacence non disponible")
+                return
+                
+            if source < 0 or source >= self.graphe.ordre:
+                messagebox.showerror("Erreur", f"Le sommet source {source} n'existe pas")
+                return
+                
+            if destination < 0 or destination >= self.graphe.ordre:
+                messagebox.showerror("Erreur", f"Le sommet destination {destination} n'existe pas")
+                return
+
+            interactions, chemin = minimum_interactions(self.graphe.matrice_adjacence, source, destination)
+            
+            if interactions == -1:
+                messagebox.showinfo("Résultat", 
+                                f"Aucun chemin trouvé entre {source} et {destination}")
+            else:
+                messagebox.showinfo("Résultat",
+                                f"Interactions minimales: {interactions}\n"
+                                f"Chemin: {chemin}")
+        
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Une erreur est survenue: {str(e)}")
+
+    def trouver_super_contaminateur(self):
+        """Trouve et affiche le super contaminateur (chemin hamiltonien)"""
+        try:
+            if not hasattr(self.graphe, 'matrice_adjacence'):
+                messagebox.showerror("Erreur", "Matrice d'adjacence non disponible")
+                return
+                
+            if self.graphe.ordre == 0:
+                messagebox.showwarning("Attention", "Le graphe est vide")
+                return
+                
+            chemin = super_contaminateur(self.graphe.matrice_adjacence)
+            if chemin:
+                messagebox.showinfo("Super Contaminateur", 
+                                 f"Chemin hamiltonien trouvé: {chemin}\n"
+                                 "Ce chemin visite tous les sommets exactement une fois.")
+            else:
+                messagebox.showinfo("Super Contaminateur", 
+                                 "Aucun chemin hamiltonien trouvé.\n"
+                                 "Aucun chemin ne visite tous les sommets exactement une fois.")
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Une erreur est survenue: {str(e)}")
 
 if __name__ == "__main__":
     root = tk.Tk()
