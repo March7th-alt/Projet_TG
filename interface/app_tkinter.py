@@ -1,14 +1,16 @@
 import sys
 import os
+import threading
+from time import sleep
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import tkinter as tk
 from tkinter import messagebox
 from graphes.core import Graphe
 from graphes.visualisation import VisualisationGraphe
+from graphes.propagation import simulate_transmission_flows
 from interface.widgets.control_panel import ControlPanel
 from interface.widgets.graph_widget import GraphWidget
-from graphes.propagation import minimum_interactions, super_contaminateur
 
 class GrapheApp:
     def __init__(self, root):
@@ -20,10 +22,15 @@ class GrapheApp:
 
         self.graphe = Graphe(0)
         self.visualisation = None
+        self.patient_zero = None
+        self.is_simulating = False
+        self.simulation_thread = None
 
         self.setup_ui()
 
     def fermer_application(self):
+        if self.is_simulating:
+            self.stop_simulation()
         self.root.destroy()
 
     def setup_ui(self):
@@ -38,6 +45,7 @@ class GrapheApp:
 
         self.dessiner_graphe()
 
+    # ===== Existing Graph Methods (unchanged) =====
     def dessiner_graphe(self):
         if self.graphe.ordre > 0:
             self.visualisation = VisualisationGraphe(self.graphe)
@@ -59,20 +67,17 @@ class GrapheApp:
                 messagebox.showwarning("Attention", "Le graphe est déjà vide")
                 return
 
-            if sommet is None:  # Si aucun sommet spécifié, supprime le dernier
+            if sommet is None:
                 sommet = self.graphe.ordre - 1
 
-            # Vérifie que le sommet existe
             if sommet < 0 or sommet >= self.graphe.ordre:
                 messagebox.showerror("Erreur", f"Le sommet {sommet} n'existe pas")
                 return
 
-            # Demande confirmation avant suppression
             if not messagebox.askyesno("Confirmation", 
                                      f"Supprimer le sommet {sommet} et toutes ses arêtes ?"):
                 return
 
-            # Supprime le sommet
             self.graphe.supprimer_sommet(sommet)
             self.dessiner_graphe()
             messagebox.showinfo("Succès", f"Sommet {sommet} supprimé avec succès")
@@ -81,8 +86,7 @@ class GrapheApp:
             messagebox.showerror("Erreur", f"Erreur lors de la suppression: {str(e)}")
 
     def supprimer_dernier_sommet(self):
-        """Supprime le dernier sommet du graphe"""
-        self.supprimer_sommet()  # Appelle sans paramètre pour supprimer le dernier
+        self.supprimer_sommet()
 
     def ajouter_arete(self, sommet1, sommet2):
         try:
@@ -147,63 +151,132 @@ class GrapheApp:
             messagebox.showerror("Erreur", str(e))
 
     def reinitialiser_graphe(self):
-        """Réinitialise complètement le graphe"""
         if messagebox.askyesno("Confirmation", "Voulez-vous vraiment réinitialiser le graphe ?"):
             self.graphe = Graphe(0)
             self.visualisation = None
             self.graph_widget.clear()
             self.dessiner_graphe()
 
-    def calculer_interactions_minimales(self, source: int, destination: int):
-        """Calcule et affiche les interactions minimales entre deux sommets"""
+    # ===== NEW: Simulation Methods =====
+    def definir_patient_zero(self):
+        """Fixed version with correct method names"""
+        if not hasattr(self, 'root') or not tk._default_root:
+            return
+                
         try:
-            if not hasattr(self.graphe, 'matrice_adjacence'):
-                messagebox.showerror("Erreur", "Matrice d'adjacence non disponible")
+            node = int(self.control_panel.patient_zero_entry.get())
+            if node < 0 or node >= self.graphe.ordre:
+                self.root.after(0, messagebox.showerror, "Erreur", f"Le sommet {node} n'existe pas")
                 return
-                
-            if source < 0 or source >= self.graphe.ordre:
-                messagebox.showerror("Erreur", f"Le sommet source {source} n'existe pas")
-                return
-                
-            if destination < 0 or destination >= self.graphe.ordre:
-                messagebox.showerror("Erreur", f"Le sommet destination {destination} n'existe pas")
-                return
-
-            interactions, chemin = minimum_interactions(self.graphe.matrice_adjacence, source, destination)
+                    
+            # Reset previous patient zero if exists
+            if hasattr(self, 'patient_zero') and self.patient_zero is not None:
+                self.root.after(0, self.graph_widget.update_node_color, self.patient_zero, "skyblue")
+                    
+            self.patient_zero = node
+            self.root.after(0, self.graph_widget.update_node_color, node, "red")
+            self.root.after(0, self.control_panel.update_info_label, f"Patient Zéro: Sommet {node}")
             
-            if interactions == -1:
-                messagebox.showinfo("Résultat", 
-                                f"Aucun chemin trouvé entre {source} et {destination}")
-            else:
-                messagebox.showinfo("Résultat",
-                                f"Interactions minimales: {interactions}\n"
-                                f"Chemin: {chemin}")
-        
-        except Exception as e:
-            messagebox.showerror("Erreur", f"Une erreur est survenue: {str(e)}")
+        except ValueError:
+            self.root.after(0, messagebox.showerror, "Erreur", "Veuillez entrer un numéro valide")
 
-    def trouver_super_contaminateur(self):
-        """Trouve et affiche le super contaminateur (chemin hamiltonien)"""
-        try:
-            if not hasattr(self.graphe, 'matrice_adjacence'):
-                messagebox.showerror("Erreur", "Matrice d'adjacence non disponible")
-                return
+    def set_patient_zero(self, node):
+        """Set the selected node as patient zero"""
+        self.patient_zero = node
+        self.graph_widget.highlight_node(node, "red")
+        self.control_panel.update_info_label(f"Patient Zéro: Sommet {node}")
+
+    def start_simulation(self):
+        """Start the propagation simulation"""
+        if self.is_simulating:
+            return
+            
+        if self.patient_zero is None:
+            messagebox.showwarning("Attention", "Veuillez sélectionner un Patient Zéro d'abord!")
+            return
+            
+        if self.graphe.ordre == 0:
+            messagebox.showwarning("Attention", "Le graphe est vide!")
+            return
+
+        # Get parameters from control panel
+        infection_prob, recovery_prob = self.control_panel.get_simulation_parameters()
+        if infection_prob is None or recovery_prob is None:
+            return
+
+        # Disable controls during simulation
+        self.is_simulating = True
+        self.control_panel.disable_simulation_controls()
+        
+        # Start simulation in background thread
+        self.simulation_thread = threading.Thread(
+            target=self.run_simulation,
+            args=(infection_prob, recovery_prob),
+            daemon=True
+        )
+        self.simulation_thread.start()
+
+    def run_simulation(self, infection_prob, recovery_prob):
+        """Run the propagation simulation"""
+        # Convert graph to adjacency list format
+        graph_dict = {
+            node: list(self.graphe.voisinage(node))
+            for node in range(self.graphe.ordre)
+        }
+        
+        # Get simulation history
+        history = simulate_transmission_flows(
+            graph_dict,
+            initial_infected=[self.patient_zero],
+            steps=20,
+            infection_prob=infection_prob,
+            recovery_prob=recovery_prob
+        )
+        
+        # Update visualization for each step
+        for step, states in enumerate(history):
+            if not self.is_simulating:
+                break  # Stop if simulation was cancelled
                 
-            if self.graphe.ordre == 0:
-                messagebox.showwarning("Attention", "Le graphe est vide")
-                return
+            # Update node colors
+            for node, state in states.items():
+                color = "red" if state == "infected" else "green" if state == "immune" else "blue"
+                self.graph_widget.update_node_color(node, color)
                 
-            chemin = super_contaminateur(self.graphe.matrice_adjacence)
-            if chemin:
-                messagebox.showinfo("Super Contaminateur", 
-                                 f"Chemin hamiltonien trouvé: {chemin}\n"
-                                 "Ce chemin visite tous les sommets exactement une fois.")
-            else:
-                messagebox.showinfo("Super Contaminateur", 
-                                 "Aucun chemin hamiltonien trouvé.\n"
-                                 "Aucun chemin ne visite tous les sommets exactement une fois.")
-        except Exception as e:
-            messagebox.showerror("Erreur", f"Une erreur est survenue: {str(e)}")
+            # Update info label
+            infected_count = sum(1 for state in states.values() if state == "infected")
+            self.control_panel.update_info_label(
+                f"Étape {step+1}: {infected_count} infecté(s)"
+            )
+            
+            # Force GUI update and wait
+            self.root.update()
+            sleep(1)  # 1 second between steps
+            
+        # Simulation ended
+        self.is_simulating = False
+        self.control_panel.enable_simulation_controls()
+
+    def stop_simulation(self):
+        """Stop the ongoing simulation"""
+        self.is_simulating = False
+        if self.simulation_thread:
+            self.simulation_thread.join()
+        self.control_panel.enable_simulation_controls()
+
+    def reset_simulation(self):
+        """Fixed reset using update_node_color"""
+        self.stop_simulation()
+        if hasattr(self, 'patient_zero') and self.patient_zero is not None:
+            self.root.after(0, self.graph_widget.update_node_color, self.patient_zero, "skyblue")
+            self.patient_zero = None
+                
+        if hasattr(self, 'graphe'):
+            for node in range(self.graphe.ordre):
+                self.root.after(0, self.graph_widget.update_node_color, node, "skyblue")
+                    
+        if hasattr(self, 'control_panel'):
+            self.root.after(0, self.control_panel.update_info_label, "Prêt")
 
 if __name__ == "__main__":
     root = tk.Tk()

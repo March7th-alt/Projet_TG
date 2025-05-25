@@ -2,43 +2,46 @@ from collections import deque, defaultdict
 import random
 from typing import Dict, List, Tuple, Optional, Set
 
-def minimum_interactions(matrice_adj: List[List[int]], source: int, destination: int) -> Tuple[int, List[int]]:
+def minimum_interactions(matrice_adj: List[List[int]], source: int, destination: int) -> None:
   
-    """
-        Question 12: Une fonction permettant de déterminer combien dinteractions suffisent à propager les
-        virus dun individu à un autre.
-        graph: Dict[int, List[int]]: matrice d'adjacence de graphe
-        noeud1:int :Noeud source
-        noeud2:int :Noeud destination
-        -> Optional[int] : La fonctions retourne un eniter ou None
+  """
+    Question 12: Une fonction permettant de déterminer combien dinteractions suffisent à propager les
+    virus dun individu à un autre.
+    graph: Dict[int, List[int]]: matrice d'adjacence de graphe
+    noeud1:int :Noeud source
+    noeud2:int :Noeud destination
+    -> Optional[int] : La fonctions retourne un eniter ou None
 
-        en va trouver le plus cour chemin enter les deux noeuds et calculer le nombre des arcs entre eux;
-    """
+    en va trouver le plus cour chemin enter les deux noeuds et calculer le nombre des arcs entre eux;
+  """
 
-    if source == destination:
-        return (0, [source])
+  if source == destination:
+    print(f"Interactions minimales: 0 (chemin: [{source}])")
+    return
 
 
-    #Stocker le noeud courant, la distance entre le noeud courant et le source, et le chemin depuis le source vers le noeud courant
-    n = len(matrice_adj)
-    file = deque()
-    file.append((source, 0, [source]))
+  #Stocker le noeud courant, la distance entre le noeud courant et le source, et le chemin depuis le source vers le noeud courant
+  n = len(matrice_adj)
+  file = deque()
+  file.append((source, 0, [source]))
 
-    #Pour garder une trace sur les noeuds qu'on a deja visitée (on utilise le set pour eviter le passage par un noeud plusieur fois)
-    visitee = set()
-    visitee.add(source)
+  #Pour garder une trace sur les noeuds qu'on a deja visitée (on utilise le set pour eviter le passage par un noeud plusieur fois)
+  visitee = set()
+  visitee.add(source)
     
-    while file:
-        courant, distance, chemin= file.popleft()
-            
-        for voisin in range(n):
-            if matrice_adj[courant][voisin] == 1:
-                if voisin == destination:
-                    return (distance + 1, chemin + [voisin])
-                if voisin not in visitee:
-                    visitee.add(voisin)
-                    file.append((voisin, distance + 1, chemin+ [voisin]))
-    return (-1, [])  # Aucun chemin trouvé
+  while file:
+    courant, distance, chemin= file.popleft()
+        
+    for voisin in range(n):
+      if matrice_adj[courant][voisin] == 1:
+        if voisin == destination:
+          print(f"Interactions minimales: {distance + 1} Chemin: {chemin + [voisin]})")
+          return
+        if voisin not in visitee:
+          visitee.add(voisin)
+          file.append((voisin, distance + 1, chemin+ [voisin]))
+  
+  print("Aucun chemin trouvé entre le source et la destination.")
 
 
 def super_contaminateur(adj_matrix: List[List[int]]) -> List[int]:
@@ -93,15 +96,168 @@ def super_contaminateur(adj_matrix: List[List[int]]) -> List[int]:
     
     return []
 
+def assign_risk_states(graph: Dict[int, List[int]], 
+                      initial_infected: List[int], 
+                      infection_prob: float = 0.7,
+                      recovery_prob: float = 0.1) -> Dict[int, str]:
+    """
+    Question 14: Assign risk states (healthy, infected, immune) to individuals 
+    and simulate one step of propagation.
+    
+    Args:
+        graph: Adjacency list representing the contact network
+        initial_infected: List of initially infected individuals
+        infection_prob: Probability of transmission per contact
+        recovery_prob: Probability an infected individual recovers and becomes immune
+        
+    Returns:
+        Dictionary mapping individuals to their states ('healthy', 'infected', 'immune')
+    """
+    states = {node: 'healthy' for node in graph}
+    
+    # Set initial infected
+    for node in initial_infected:
+        if node in states:
+            states[node] = 'infected'
+    
+    # Determine new infections
+    new_infections = set()
+    for node, state in states.items():
+        if state == 'infected':
+            # With recovery_prob chance, recover
+            if random.random() < recovery_prob:
+                states[node] = 'immune'
+            else:
+                # Infect neighbors
+                for neighbor in graph.get(node, []):
+                    if states[neighbor] == 'healthy' and random.random() < infection_prob:
+                        new_infections.add(neighbor)
+    
+    # Apply new infections
+    for node in new_infections:
+        states[node] = 'infected'
+    
+    return states
 
-    #test:
 
-    ma = [
-    [0, 1, 1, 1, 0],
-    [1, 0, 1, 0, 0], 
-    [1, 1, 0, 1, 0],
-    [1, 0, 1, 0, 1],
-    [0, 0, 0, 1, 0]
-    ]
+def detect_isolated_groups(graph: Dict[int, List[int]]) -> List[Set[int]]:
+    """
+    Question 15: Detect isolated groups or critical zones in the contact network.
+    
+    Uses BFS to find all connected components in the graph.
+    
+    Args:
+        graph: Adjacency list representing the contact network
+        
+    Returns:
+        List of sets, where each set contains nodes in an isolated group
+    """
+    visited = set()
+    components = []
+    
+    for node in graph:
+        if node not in visited:
+            # Start BFS for this component
+            queue = deque([node])
+            visited.add(node)
+            component = set()
+            
+            while queue:
+                current = queue.popleft()
+                component.add(current)
+                
+                for neighbor in graph.get(current, []):
+                    if neighbor not in visited:
+                        visited.add(neighbor)
+                        queue.append(neighbor)
+            
+            components.append(component)
+    
+    return components
 
-    minimum_interactions(ma,4,4)
+
+def minimum_time_to_infection(graph: Dict[int, List[int]], 
+                             sources: List[int], 
+                             target: int,
+                             time_per_interaction: float = 1.0) -> Optional[float]:
+    """
+    Question 16: Calculate the minimum time for infection to reach a target from 
+    any of the sources.
+    
+    Uses multi-source BFS where all sources start with distance 0.
+    
+    Args:
+        graph: Adjacency list representing the contact network
+        sources: List of source nodes where infection starts
+        target: Target node to reach
+        time_per_interaction: Time taken for one interaction
+        
+    Returns:
+        Minimum time needed or None if target can't be reached
+    """
+    if target in sources:
+        return 0.0
+    
+    visited = set(sources)
+    queue = deque([(source, 0) for source in sources])
+    
+    while queue:
+        current, distance = queue.popleft()
+        
+        for neighbor in graph.get(current, []):
+            if neighbor == target:
+                return (distance + 1) * time_per_interaction
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append((neighbor, distance + 1))
+    
+    return None  # Target not reachable
+
+
+def simulate_transmission_flows(graph: Dict[int, List[int]], 
+                               initial_infected: List[int], 
+                               steps: int = 10,
+                               infection_prob: float = 0.5,
+                               recovery_prob: float = 0.2) -> List[Dict[int, str]]:
+    """
+    Question 17: Simulate transmission flows over multiple time steps.
+    
+    Args:
+        graph: Adjacency list representing the contact network
+        initial_infected: List of initially infected individuals
+        steps: Number of time steps to simulate
+        infection_prob: Probability of transmission per contact
+        recovery_prob: Probability an infected individual recovers and becomes immune
+        
+    Returns:
+        List of state dictionaries for each time step
+    """
+    simulation_history = []
+    
+    # Initialize states
+    states = {node: 'healthy' for node in graph}
+    for node in initial_infected:
+        if node in states:
+            states[node] = 'infected'
+    simulation_history.append(states.copy())
+    
+    for _ in range(1, steps):
+        new_states = states.copy()
+        
+        # Process recovery and immunity
+        for node in graph:
+            if states[node] == 'infected':
+                if random.random() < recovery_prob:
+                    new_states[node] = 'immune'
+        
+        # Process new infections
+        for node in graph:
+            if states[node] == 'infected':
+                for neighbor in graph.get(node, []):
+                    if states[neighbor] == 'healthy' and random.random() < infection_prob:
+                        new_states[neighbor] = 'infected'
+        
+        states = new_states
+        simulation_history.append(states.copy())
+    
+    return simulation_history

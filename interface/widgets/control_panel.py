@@ -1,4 +1,3 @@
-# control_panel.py
 import tkinter as tk
 from tkinter import ttk, messagebox
 
@@ -56,12 +55,6 @@ class ControlPanel(ttk.Frame):
         ttk.Button(algo_frame, text="Afficher Degrés", command=self.controller.afficher_degres).pack(fill=tk.X, padx=5, pady=2)
         ttk.Button(algo_frame, text="Trouver Cycle Eulerien", command=self.controller.trouver_cycle_eulerien).pack(fill=tk.X, padx=5, pady=2)
         ttk.Button(algo_frame, text="Trouver Chemin Eulerien", command=self.controller.trouver_chemin_eulerien).pack(fill=tk.X, padx=5, pady=2)
-        
-        # Nouveaux boutons pour les fonctions de propagation
-        ttk.Button(algo_frame, text="Interactions Minimales", 
-                  command=self.demander_parametres_interactions).pack(fill=tk.X, padx=5, pady=2)
-        ttk.Button(algo_frame, text="Trouver Super Contaminateur", 
-                  command=self.controller.trouver_super_contaminateur).pack(fill=tk.X, padx=5, pady=2)
 
         # Chemin de longueur k
         k_frame = ttk.LabelFrame(self, text="Chemin de longueur k")
@@ -81,6 +74,45 @@ class ControlPanel(ttk.Frame):
         self.sommet_entry.pack(side=tk.LEFT, padx=5)
         ttk.Button(voisin_frame, text="Afficher", command=self.afficher_voisins).pack(side=tk.LEFT, padx=5)
 
+         # ===== Simulation Section =====
+        sim_frame = ttk.LabelFrame(self, text="Simulation de Propagation", padding=5)
+        sim_frame.pack(fill=tk.X, padx=5, pady=5)
+
+        # Patient Zero input
+        patient_zero_frame = ttk.Frame(sim_frame)
+        patient_zero_frame.pack(fill=tk.X, pady=2)
+        
+        ttk.Label(patient_zero_frame, text="Patient Zéro:").pack(side=tk.LEFT)
+        self.patient_zero_entry = ttk.Entry(patient_zero_frame, width=5)
+        self.patient_zero_entry.pack(side=tk.LEFT, padx=5)
+        ttk.Button(patient_zero_frame, text="Définir", 
+                  command=self.controller.definir_patient_zero).pack(side=tk.LEFT)
+
+        # Simulation controls
+        sim_controls = ttk.Frame(sim_frame)
+        sim_controls.pack(fill=tk.X, pady=2)
+        
+        ttk.Button(sim_controls, text="Démarrer", 
+                  command=self.controller.start_simulation).pack(side=tk.LEFT, expand=True, padx=2)
+        ttk.Button(sim_controls, text="Arrêter", 
+                  command=self.controller.stop_simulation).pack(side=tk.LEFT, expand=True, padx=2)
+        ttk.Button(sim_controls, text="Réinitialiser", 
+                  command=self.controller.reset_simulation).pack(side=tk.LEFT, expand=True, padx=2)
+
+        # Simulation parameters
+        param_frame = ttk.Frame(sim_frame)
+        param_frame.pack(fill=tk.X, pady=2)
+
+        ttk.Label(param_frame, text="Prob. Infection:").pack(side=tk.LEFT)
+        self.infection_prob = ttk.Spinbox(param_frame, from_=0, to=1, increment=0.1, width=5)
+        self.infection_prob.set(0.4)
+        self.infection_prob.pack(side=tk.LEFT, padx=2)
+
+        ttk.Label(param_frame, text="Prob. Récupération:").pack(side=tk.LEFT)
+        self.recovery_prob = ttk.Spinbox(param_frame, from_=0, to=1, increment=0.05, width=5)
+        self.recovery_prob.set(0.1)
+        self.recovery_prob.pack(side=tk.LEFT, padx=2)
+
         # Section informations
         info_frame = ttk.LabelFrame(self, text="Informations")
         info_frame.pack(fill=tk.X, padx=5, pady=5)
@@ -88,30 +120,37 @@ class ControlPanel(ttk.Frame):
         self.info_label = ttk.Label(info_frame, text="Ordre du graphe: 0")
         self.info_label.pack(pady=5)
 
-    def demander_parametres_interactions(self):
-        """Ouvre une boîte de dialogue pour les paramètres des interactions minimales"""
-        dialog = tk.Toplevel()
-        dialog.title("Interactions Minimales")
-        
-        ttk.Label(dialog, text="Sommet source:").grid(row=0, column=0, padx=5, pady=5)
-        source_entry = ttk.Entry(dialog)
-        source_entry.grid(row=0, column=1, padx=5, pady=5)
-        
-        ttk.Label(dialog, text="Sommet destination:").grid(row=1, column=0, padx=5, pady=5)
-        dest_entry = ttk.Entry(dialog)
-        dest_entry.grid(row=1, column=1, padx=5, pady=5)
-        
-        def calculer():
-            try:
-                source = int(source_entry.get())
-                destination = int(dest_entry.get())
-                self.controller.calculer_interactions_minimales(source, destination)
-                dialog.destroy()
-            except ValueError:
-                messagebox.showerror("Erreur", "Veuillez entrer des numéros valides")
-        
-        ttk.Button(dialog, text="Calculer", command=calculer).grid(row=2, columnspan=2, pady=10)
+    def get_patient_zero_input(self):
+        """Get the patient zero node from entry field"""
+        try:
+            return int(self.patient_zero_entry.get())
+        except ValueError:
+            messagebox.showerror("Erreur", "Veuillez entrer un numéro de sommet valide")
+            return None
 
+    def get_simulation_parameters(self):
+        """Returns the current simulation parameters"""
+        try:
+            infection = float(self.infection_prob.get())
+            recovery = float(self.recovery_prob.get())
+            return infection, recovery
+        except ValueError:
+            messagebox.showerror("Erreur", "Paramètres de simulation invalides")
+            return None, None
+
+    def disable_simulation_controls(self):
+        """Disable simulation buttons during simulation"""
+        for child in self.winfo_children():
+            if isinstance(child, ttk.Button):
+                child.config(state=tk.DISABLED)
+
+    def enable_simulation_controls(self):
+        """Enable simulation buttons"""
+        for child in self.winfo_children():
+            if isinstance(child, ttk.Button):
+                child.config(state=tk.NORMAL)
+
+    # ===== Existing methods remain unchanged =====
     def supprimer_sommet_specifique(self):
         """Gère la suppression d'un sommet spécifique"""
         try:
