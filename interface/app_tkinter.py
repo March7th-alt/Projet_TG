@@ -1,3 +1,4 @@
+import random
 import sys
 import os
 import threading
@@ -384,6 +385,109 @@ class GrapheApp:
                     
         if hasattr(self, 'control_panel'):
             self.root.after(0, self.control_panel.update_info_label, "Prêt")
+
+    def vaccinate_highest_degree(self):
+        """Vaccinate the node with the highest degree using adjacency matrix"""
+        if self.graphe.ordre == 0:
+            messagebox.showwarning("Warning", "Graph is empty!")
+            return
+        
+        # Find node with highest degree (sum of row in adjacency matrix)
+        max_degree = -1
+        vaccinated_node = 0
+        for node in range(self.graphe.ordre):
+            degree = sum(self.graphe.matrice_adjacence[node])
+            if degree > max_degree:
+                max_degree = degree
+                vaccinated_node = node
+        
+        self.vaccinated_node = vaccinated_node  # Store the vaccinated node
+        self.graph_widget.update_node_color(vaccinated_node, "yellow")
+        self.control_panel.update_info_label(f"Vaccinated node: {vaccinated_node} (Degree: {max_degree})")
+
+
+    def simulate_after_vaccination(self):
+        """Run simulation with vaccination using adjacency matrix"""
+        if not hasattr(self, 'vaccinated_node'):
+            messagebox.showwarning("Warning", "Please vaccinate a node first!")
+            return
+        
+        if self.patient_zero is None:
+            messagebox.showwarning("Warning", "Please select Patient Zero first!")
+            return
+        
+        # Get parameters from control panel
+        infection_prob, recovery_prob = self.control_panel.get_simulation_parameters()
+        if infection_prob is None or recovery_prob is None:
+            return
+        
+        # Run simulation with adjacency matrix
+        history = self.simulate_with_vaccination(
+            self.graphe.matrice_adjacence,
+            [self.patient_zero],
+            20,
+            infection_prob,
+            recovery_prob,
+            [self.vaccinated_node]
+        )
+        
+        # Update visualization
+        for step, states in enumerate(history):
+            for node, state in enumerate(states):
+                color = "red" if state == "infected" else "green" if state == "immune" else "blue"
+                if node == self.vaccinated_node:
+                    color = "yellow"  # Keep vaccinated node yellow
+                self.graph_widget.update_node_color(node, color)
+            
+            infected_count = states.count("infected")
+            self.control_panel.update_info_label(
+                f"Step {step+1}: {infected_count} infected | Node {self.vaccinated_node} vaccinated"
+            )
+            
+            self.root.update()
+            sleep(1)
+
+    def simulate_with_vaccination(self, adj_matrix, initial_infected, steps, infection_prob, recovery_prob, vaccinated_nodes):
+        """Simulation using adjacency matrix with vaccination"""
+        num_nodes = len(adj_matrix)
+        states = ["healthy"] * num_nodes
+        
+        # Set initial states
+        for node in initial_infected:
+            states[node] = "infected"
+        for node in vaccinated_nodes:
+            states[node] = "immune"
+        
+        history = [states.copy()]
+        
+        for _ in range(steps):
+            new_states = states.copy()
+            
+            for node in range(num_nodes):
+                # Skip vaccinated nodes
+                if node in vaccinated_nodes:
+                    continue
+                    
+                # Recovery logic
+                if states[node] == "infected" and random.random() < recovery_prob:
+                    new_states[node] = "immune"
+                    continue
+                    
+                # Infection logic
+                if states[node] == "healthy":
+                    for neighbor in range(num_nodes):
+                        if (adj_matrix[node][neighbor] and  # There's a connection
+                            states[neighbor] == "infected" and 
+                            neighbor not in vaccinated_nodes and  # Can't spread from vaccinated
+                            random.random() < infection_prob):
+                            new_states[node] = "infected"
+                            break
+            
+            states = new_states
+            history.append(states.copy())
+        
+        return history
+
 
 if __name__ == "__main__":
     root = tk.Tk()

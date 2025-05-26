@@ -279,7 +279,8 @@ def simulate_transmission_flows(adj_matrix: List[List[int]],
                                initial_infected: List[int], 
                                steps: int = 10,
                                infection_prob: float = 0.5,
-                               recovery_prob: float = 0.2) -> List[Dict[int, str]]:
+                               recovery_prob: float = 0.2, vaccinated_nodes=[]
+                                ) -> List[Dict[int, str]]:
     """
     Question 17: Simulate transmission flows over multiple time steps.
     
@@ -301,16 +302,17 @@ def simulate_transmission_flows(adj_matrix: List[List[int]],
     for node in initial_infected:
         if node < n:
             states[node] = 'infected'
+    for node in vaccinated_nodes:
+        if node < n:
+            states[node] = 'immune'
     simulation_history.append(states.copy())
     
     for _ in range(1, steps):
         new_states = states.copy()
         
-        # Process recovery and immunity
         for node in range(n):
-            if states[node] == 'infected':
-                if random.random() < recovery_prob:
-                    new_states[node] = 'immune'
+            if node in vaccinated_nodes:
+                continue
         
         # Process new infections
         for node in range(n):

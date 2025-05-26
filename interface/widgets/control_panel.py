@@ -95,7 +95,6 @@ class ControlPanel(ttk.Frame):
         
         ttk.Button(min_int_frame, text="Interactions Min.", 
               command=self.show_min_interactions).pack(side=tk.LEFT, padx=(10,0))
-        
 
         #Super contaminateur
         ttk.Button(
@@ -152,6 +151,15 @@ class ControlPanel(ttk.Frame):
         self.infection_prob = ttk.Spinbox(param_frame, from_=0, to=1, increment=0.1, width=5)
         self.infection_prob.set(0.4)
         self.infection_prob.pack(side=tk.LEFT, padx=2)
+
+        vacc_frame = ttk.Frame(sim_frame)
+        vacc_frame.pack(fill=tk.X, pady=5)
+
+        ttk.Button(vacc_frame, text="Vaccinate Highest Degree", 
+              command=self.controller.vaccinate_highest_degree).pack(side=tk.LEFT, padx=2)
+    
+        ttk.Button(vacc_frame, text="Simulate After Vaccination", 
+              command=self.controller.simulate_after_vaccination).pack(side=tk.LEFT, padx=2)
 
         # Section informations
         info_frame = ttk.LabelFrame(self, text="Informations")
