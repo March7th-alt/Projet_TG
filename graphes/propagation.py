@@ -278,7 +278,7 @@ def minimum_time_to_infection(adj_matrix: List[List[int]],
 def simulate_transmission_flows(adj_matrix: List[List[int]], 
                                initial_infected: List[int], 
                                steps: int = 10,
-                               infection_prob: float = 0.5,
+                               infection_prob: float = 0.9,
                                recovery_prob: float = 0.2, vaccinated_nodes=[]
                                 ) -> List[Dict[int, str]]:
     """

@@ -149,7 +149,7 @@ class ControlPanel(ttk.Frame):
 
         ttk.Label(param_frame, text="Prob. Infection:").pack(side=tk.LEFT)
         self.infection_prob = ttk.Spinbox(param_frame, from_=0, to=1, increment=0.1, width=5)
-        self.infection_prob.set(0.4)
+        self.infection_prob.set(0.9)
         self.infection_prob.pack(side=tk.LEFT, padx=2)
 
         vacc_frame = ttk.Frame(sim_frame)
