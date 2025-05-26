@@ -77,6 +77,26 @@ class ControlPanel(ttk.Frame):
         self.sommet_entry.pack(side=tk.LEFT, padx=5)
         ttk.Button(voisin_frame, text="Afficher", command=self.afficher_voisins).pack(side=tk.LEFT, padx=5)
 
+        #Section Propagation
+        proba_frame = ttk.LabelFrame(self, text="Analayse de Propagation")
+        proba_frame.pack(fill=tk.X, padx=5, pady=5)
+
+        # Minimum interactions controls
+        min_int_frame = ttk.Frame(proba_frame)
+        min_int_frame.pack(fill=tk.X, pady=2)
+        
+        ttk.Label(min_int_frame, text="Source:").pack(side=tk.LEFT)
+        self.min_int_source = ttk.Spinbox(min_int_frame, from_=0, to=0, width=5)
+        self.min_int_source.pack(side=tk.LEFT)
+        
+        ttk.Label(min_int_frame, text="Destination:").pack(side=tk.LEFT, padx=(5,0))
+        self.min_int_dest = ttk.Spinbox(min_int_frame, from_=0, to=0, width=5)
+        self.min_int_dest.pack(side=tk.LEFT)
+        
+        ttk.Button(min_int_frame, text="Interactions Min.", 
+              command=self.show_min_interactions).pack(side=tk.LEFT, padx=(10,0))
+
+
          # ===== Simulation Section =====
         sim_frame = ttk.LabelFrame(self, text="Simulation de Propagation", padding=5)
         sim_frame.pack(fill=tk.X, padx=5, pady=5)
@@ -187,6 +207,44 @@ class ControlPanel(ttk.Frame):
             "Ordre du Graphe",
             f"Le graphe contient {order} sommet(s)",
         )
+
+    def show_min_interactions(self):
+        """Handle minimum interactions button with proper error checking"""
+        if not hasattr(self.controller, 'graphe') or self.controller.graphe.ordre == 0:
+            messagebox.showwarning("Erreur", "Le graphe est vide!")
+            return
+        
+        try:
+            source = int(self.min_int_source.get())
+            dest = int(self.min_int_dest.get())
+            max_node = self.controller.graphe.ordre - 1
+            
+            if source < 0 or source > max_node or dest < 0 or dest > max_node:
+                raise ValueError("Noeud invalide")
+                
+            result = self.controller.minimum_interactions(source, dest)
+            
+            # Safe dictionary access with .get()
+            interactions = result.get('interactions')
+            path = result.get('path', [])
+            message = result.get('message', "")
+            
+            if interactions is not None:
+                display_msg = (
+                    f"Interactions minimales: {interactions}\n"
+                    f"Chemin: {path}\n"
+                    f"{message}"
+                )
+            else:
+                display_msg = f"Aucun chemin trouvé\n{message}"
+                
+            messagebox.showinfo("Résultat", display_msg)
+            
+        except ValueError as e:
+            messagebox.showerror("Erreur", f"Entrée invalide: {str(e)}")
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Erreur inattendue: {str(e)}")
+
 
 
 
