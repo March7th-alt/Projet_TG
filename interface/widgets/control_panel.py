@@ -56,6 +56,7 @@ class ControlPanel(ttk.Frame):
         ttk.Button(algo_frame, text="Trouver Cycle Eulerien", command=self.controller.trouver_cycle_eulerien).pack(fill=tk.X, padx=5, pady=2)
         ttk.Button(algo_frame, text="Trouver Chemin Eulerien", command=self.controller.trouver_chemin_eulerien).pack(fill=tk.X, padx=5, pady=2)
         ttk.Button(algo_frame, text="Afficher Matrice", command=self.show_adjacency_matrix).pack(fill=tk.X, padx=5, pady=2)
+        ttk.Button(algo_frame, text="Afficher Ordre", command=self.show_graph_order).pack(fill=tk.X, padx=5, pady=2)
 
 
         # Chemin de longueur k
@@ -174,6 +175,22 @@ class ControlPanel(ttk.Frame):
             text="Fermer",
             command=popup.destroy
         ).pack(pady=5)
+
+    def show_graph_order(self):
+        """Display the graph order (number of vertices)"""
+        if not hasattr(self.controller, 'graphe'):
+            messagebox.showinfo("Ordre du Graphe", "Aucun graphe n'est chargé")
+            return
+        
+        order = self.controller.graphe.ordre
+        messagebox.showinfo(
+            "Ordre du Graphe",
+            f"Le graphe contient {order} sommet(s)",
+        )
+
+
+
+
 
 
     def get_patient_zero_input(self):
