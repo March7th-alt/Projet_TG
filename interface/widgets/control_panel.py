@@ -108,11 +108,6 @@ class ControlPanel(ttk.Frame):
         self.infection_prob.set(0.4)
         self.infection_prob.pack(side=tk.LEFT, padx=2)
 
-        ttk.Label(param_frame, text="Prob. Récupération:").pack(side=tk.LEFT)
-        self.recovery_prob = ttk.Spinbox(param_frame, from_=0, to=1, increment=0.05, width=5)
-        self.recovery_prob.set(0.1)
-        self.recovery_prob.pack(side=tk.LEFT, padx=2)
-
         # Section informations
         info_frame = ttk.LabelFrame(self, text="Informations")
         info_frame.pack(fill=tk.X, padx=5, pady=5)
@@ -132,7 +127,7 @@ class ControlPanel(ttk.Frame):
         """Returns the current simulation parameters"""
         try:
             infection = float(self.infection_prob.get())
-            recovery = float(self.recovery_prob.get())
+            recovery = 0.0
             return infection, recovery
         except ValueError:
             messagebox.showerror("Erreur", "Paramètres de simulation invalides")
