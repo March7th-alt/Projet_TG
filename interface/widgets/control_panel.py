@@ -55,6 +55,8 @@ class ControlPanel(ttk.Frame):
         ttk.Button(algo_frame, text="Afficher Degrés", command=self.controller.afficher_degres).pack(fill=tk.X, padx=5, pady=2)
         ttk.Button(algo_frame, text="Trouver Cycle Eulerien", command=self.controller.trouver_cycle_eulerien).pack(fill=tk.X, padx=5, pady=2)
         ttk.Button(algo_frame, text="Trouver Chemin Eulerien", command=self.controller.trouver_chemin_eulerien).pack(fill=tk.X, padx=5, pady=2)
+        ttk.Button(algo_frame, text="Afficher Matrice", command=self.show_adjacency_matrix).pack(fill=tk.X, padx=5, pady=2)
+
 
         # Chemin de longueur k
         k_frame = ttk.LabelFrame(self, text="Chemin de longueur k")
@@ -114,6 +116,65 @@ class ControlPanel(ttk.Frame):
 
         self.info_label = ttk.Label(info_frame, text="Ordre du graphe: 0")
         self.info_label.pack(pady=5)
+
+    def show_adjacency_matrix(self):
+        """Display the adjacency matrix in a popup window"""
+        if not hasattr(self.controller, 'graphe') or self.controller.graphe.ordre == 0:
+            messagebox.showinfo("Info", "Le graphe est vide.")
+            return
+
+        # Create popup window
+        popup = tk.Toplevel(self)
+        popup.title("Matrice d'adjacence")
+        popup.geometry("500x400")
+        
+        # Add scrollbars
+        frame = ttk.Frame(popup)
+        frame.pack(fill=tk.BOTH, expand=True)
+        
+        y_scroll = ttk.Scrollbar(frame)
+        y_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        x_scroll = ttk.Scrollbar(frame, orient=tk.HORIZONTAL)
+        x_scroll.pack(side=tk.BOTTOM, fill=tk.X)
+        
+        # Create text widget with monospace font for alignment
+        text = tk.Text(
+            frame,
+            wrap=tk.NONE,
+            font=("Courier New", 10),
+            yscrollcommand=y_scroll.set,
+            xscrollcommand=x_scroll.set
+        )
+        text.pack(fill=tk.BOTH, expand=True)
+        
+        y_scroll.config(command=text.yview)
+        x_scroll.config(command=text.xview)
+        
+        # Get matrix data
+        matrice = self.controller.graphe.matrice_adjacence
+        n = self.controller.graphe.ordre
+        
+        # Create header
+        header = "    " + "  ".join(f"{i:>3}" for i in range(n)) + "\n"
+        text.insert(tk.END, header)
+        text.insert(tk.END, "   " + "-" * (4 * n) + "\n")
+        
+        # Add matrix rows
+        for i in range(n):
+            row = f"{i:2}| " + "  ".join(f"{matrice[i][j]:>3}" for j in range(n)) + "\n"
+            text.insert(tk.END, row)
+        
+        # Make text read-only
+        text.config(state=tk.DISABLED)
+        
+        # Add close button
+        ttk.Button(
+            popup,
+            text="Fermer",
+            command=popup.destroy
+        ).pack(pady=5)
+
 
     def get_patient_zero_input(self):
         """Get the patient zero node from entry field"""

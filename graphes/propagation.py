@@ -2,7 +2,7 @@ from collections import deque, defaultdict
 import random
 from typing import Dict, List, Tuple, Optional, Set
 
-def minimum_interactions(matrice_adj: List[List[int]], source: int, destination: int) -> None:
+def minimum_interactions(matrice_adj: List[List[int]], source: int, destination: int) -> Dict:
   
   """
     Question 12: Une fonction permettant de déterminer combien dinteractions suffisent à propager les
@@ -14,10 +14,20 @@ def minimum_interactions(matrice_adj: List[List[int]], source: int, destination:
 
     en va trouver le plus cour chemin enter les deux noeuds et calculer le nombre des arcs entre eux;
   """
+  result = {
+        'success': False,
+        'interactions': None,
+        'path': [],
+        'message': "",
+        'source': source,
+        'destination': destination
+    }
 
   if source == destination:
-    print(f"Interactions minimales: 0 (chemin: [{source}])")
-    return
+    return{
+            'success': True,
+            'message': "Source et destination sont les meme"
+    }
 
 
   #Stocker le noeud courant, la distance entre le noeud courant et le source, et le chemin depuis le source vers le noeud courant
@@ -35,16 +45,20 @@ def minimum_interactions(matrice_adj: List[List[int]], source: int, destination:
     for voisin in range(n):
       if matrice_adj[courant][voisin] == 1:
         if voisin == destination:
-          print(f"Interactions minimales: {distance + 1} Chemin: {chemin + [voisin]})")
-          return
+          return {
+                        'success': True,
+                        'interactions': distance + 1,
+                        'path': chemin + [voisin],
+          }
         if voisin not in visitee:
           visitee.add(voisin)
           file.append((voisin, distance + 1, chemin+ [voisin]))
   
-  print("Aucun chemin trouvé entre le source et la destination.")
+  result['message'] = "No path found between nodes"
+  return result
 
 
-def super_contaminateur(adj_matrix: List[List[int]]) -> List[int]:
+def super_contaminateur(adj_matrix: List[List[int]]) -> dict:
     """
     Finds a Hamiltonian path using an adjacency matrix representation.
     
@@ -54,6 +68,17 @@ def super_contaminateur(adj_matrix: List[List[int]]) -> List[int]:
     Returnsj:
         List of node indices representing the path, or empty list if none found
     """
+    result = {
+        'success': False,
+        'path': [],
+        'message': "No Hamiltonian path found",
+        'node_count': len(adj_matrix)
+    }
+
+    if not adj_matrix:
+        result['message'] = "Empty graph"
+        return result
+
     def backtrack(current: int, path: List[int], visited: List[bool]) -> Optional[List[int]]:
         if len(path) == len(adj_matrix):
             return path.copy()
@@ -67,19 +92,15 @@ def super_contaminateur(adj_matrix: List[List[int]]) -> List[int]:
             visited[neighbor] = True
             path.append(neighbor)
             
-            result = backtrack(neighbor, path, visited)
-            if result is not None:
-                return result
+            found_path = backtrack(neighbor, path, visited)
+            if found_path is not None:
+                return found_path
                 
             path.pop()
             visited[neighbor] = False
         
         return None
 
-
-    #si graphe vide, retourner liste vide
-    if not adj_matrix:
-        return []
     
     n = len(adj_matrix) #n = nombre des noeuds
     nodes = list(range(n)) #on met les noueds dans une liste
@@ -89,14 +110,19 @@ def super_contaminateur(adj_matrix: List[List[int]]) -> List[int]:
         visited = [False] * n #mettre tout les noeuds a false (on a pas visite tout les noeuds)
         visited[debut] = True #on met le noeud 'debut' a true (car on a visite ce noeud)
         path = [debut] #on ajoute debut dans le chemin pour demarer
-        
-        result = backtrack(debut, path, visited)
-        if result is not None:
+
+        hamiltonian_path = backtrack(debut, path, visited)
+        if hamiltonian_path:
+            result.update({
+                'success': True,
+                'path': hamiltonian_path,
+                'message': f"Found Hamiltonian path with {len(hamiltonian_path)} nodes"
+            })
             return result
     
-    return []
+    return result
 
-def assign_risk_states(graph: Dict[int, List[int]], 
+def assign_risk_states(adj_matrix: List[List[int]], 
                       initial_infected: List[int], 
                       infection_prob: float = 0.7,
                       recovery_prob: float = 0.1) -> Dict[int, str]:
@@ -113,11 +139,12 @@ def assign_risk_states(graph: Dict[int, List[int]],
     Returns:
         Dictionary mapping individuals to their states ('healthy', 'infected', 'immune')
     """
-    states = {node: 'healthy' for node in graph}
+    n = len(adj_matrix)
+    states = {node: 'healthy' for node in range(n)}
     
     # Set initial infected
     for node in initial_infected:
-        if node in states:
+        if node <n:
             states[node] = 'infected'
     
     # Determine new infections
@@ -129,8 +156,8 @@ def assign_risk_states(graph: Dict[int, List[int]],
                 states[node] = 'immune'
             else:
                 # Infect neighbors
-                for neighbor in graph.get(node, []):
-                    if states[neighbor] == 'healthy' and random.random() < infection_prob:
+                for neighbor, connected in enumerate(adj_matrix[node]):
+                    if connected and states[neighbor] == 'healthy' and random.random() < infection_prob:
                         new_infections.add(neighbor)
     
     # Apply new infections
@@ -140,7 +167,7 @@ def assign_risk_states(graph: Dict[int, List[int]],
     return states
 
 
-def detect_isolated_groups(graph: Dict[int, List[int]]) -> List[Set[int]]:
+def detect_isolated_groups(adj_matrix: List[List[int]]) -> Dict:
     """
     Question 15: Detect isolated groups or critical zones in the contact network.
     
@@ -152,31 +179,84 @@ def detect_isolated_groups(graph: Dict[int, List[int]]) -> List[Set[int]]:
     Returns:
         List of sets, where each set contains nodes in an isolated group
     """
+    n = len(adj_matrix)
     visited = set()
+    visited = [False] * n
     components = []
     
-    for node in graph:
+    for node in range(n):
         if node not in visited:
             # Start BFS for this component
             queue = deque([node])
             visited.add(node)
+        if not visited[node]:
+            queue = [node]
+            visited[node] = True
             component = set()
             
             while queue:
                 current = queue.popleft()
+                current = queue.pop()
                 component.add(current)
                 
-                for neighbor in graph.get(current, []):
-                    if neighbor not in visited:
+                for neighbor in range(n):
+                    if adj_matrix[current][neighbor] and neighbor not in visited:
                         visited.add(neighbor)
+                    if adj_matrix[current][neighbor] and not visited[neighbor]:
+                        visited[neighbor] = True
                         queue.append(neighbor)
             
             components.append(component)
+
+    # Critical nodes/edges detection (simplified)
+    critical_nodes = set()
+    critical_edges = set()
+
+    # For each node, check if removing it increases components
+    original_components = len(components)
+    for node in range(n):
+        temp_adj = [row.copy() for row in adj_matrix]
+        # Remove node (clear its row/column)
+        for i in range(n):
+            temp_adj[node][i] = 0
+            temp_adj[i][node] = 0
+        
+        # Recalculate components
+        new_components = len(detect_components(temp_adj))
+        if new_components > original_components:
+            critical_nodes.add(node)
     
+    # Similarly for edges (exercise left for you)
+    
+    return {
+        'components': components,
+        'critical_nodes': list(critical_nodes),
+        'critical_edges': list(critical_edges),  # Implement similarly
+        'is_critical': len(critical_nodes) > 0
+    }
+      
+def detect_components(adj_matrix):
+    """Helper for component detection"""
+    n = len(adj_matrix)
+    visited = [False] * n
+    components = []
+    for node in range(n):
+        if not visited[node]:
+            component = set()
+            stack = [node]
+            visited[node] = True
+            while stack:
+                current = stack.pop()
+                component.add(current)
+                for neighbor in range(n):
+                    if adj_matrix[current][neighbor] and not visited[neighbor]:
+                        visited[neighbor] = True
+                        stack.append(neighbor)
+            components.append(component)
     return components
 
 
-def minimum_time_to_infection(graph: Dict[int, List[int]], 
+def minimum_time_to_infection(adj_matrix: List[List[int]], 
                              sources: List[int], 
                              target: int,
                              time_per_interaction: float = 1.0) -> Optional[float]:
@@ -195,6 +275,7 @@ def minimum_time_to_infection(graph: Dict[int, List[int]],
     Returns:
         Minimum time needed or None if target can't be reached
     """
+    n = len(adj_matrix)
     if target in sources:
         return 0.0
     
@@ -204,7 +285,8 @@ def minimum_time_to_infection(graph: Dict[int, List[int]],
     while queue:
         current, distance = queue.popleft()
         
-        for neighbor in graph.get(current, []):
+        for neighbor in range(n):
+          if adj_matrix[current][neighbor]:  
             if neighbor == target:
                 return (distance + 1) * time_per_interaction
             if neighbor not in visited:
@@ -214,7 +296,7 @@ def minimum_time_to_infection(graph: Dict[int, List[int]],
     return None  # Target not reachable
 
 
-def simulate_transmission_flows(graph: Dict[int, List[int]], 
+def simulate_transmission_flows(adj_matrix: List[List[int]], 
                                initial_infected: List[int], 
                                steps: int = 10,
                                infection_prob: float = 0.5,
@@ -232,12 +314,13 @@ def simulate_transmission_flows(graph: Dict[int, List[int]],
     Returns:
         List of state dictionaries for each time step
     """
+    n = len(adj_matrix)
     simulation_history = []
     
     # Initialize states
-    states = {node: 'healthy' for node in graph}
+    states = {node: 'healthy' for node in range(n)}
     for node in initial_infected:
-        if node in states:
+        if node < n:
             states[node] = 'infected'
     simulation_history.append(states.copy())
     
@@ -245,16 +328,16 @@ def simulate_transmission_flows(graph: Dict[int, List[int]],
         new_states = states.copy()
         
         # Process recovery and immunity
-        for node in graph:
+        for node in range(n):
             if states[node] == 'infected':
                 if random.random() < recovery_prob:
                     new_states[node] = 'immune'
         
         # Process new infections
-        for node in graph:
+        for node in range(n):
             if states[node] == 'infected':
-                for neighbor in graph.get(node, []):
-                    if states[neighbor] == 'healthy' and random.random() < infection_prob:
+                for neighbor in range(n):
+                    if adj_matrix[node][neighbor] and states[neighbor] == 'healthy' and random.random() < infection_prob:
                         new_states[neighbor] = 'infected'
         
         states = new_states
