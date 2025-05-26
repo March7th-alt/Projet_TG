@@ -157,6 +157,35 @@ class GrapheApp:
             self.graph_widget.clear()
             self.dessiner_graphe()
 
+
+    def minimum_interactions(self, source, dest):
+        """Controller method with proper error handling"""
+        if not hasattr(self, 'graphe'):
+            return {
+                'success': False,
+                'message': "Graph not initialized"
+            }
+            
+        if self.graphe.ordre == 0:
+            return {
+                'success': False,
+                'message': "Empty graph"
+            }
+        
+        try:
+            from graphes.propagation import minimum_interactions
+            return minimum_interactions(
+                self.graphe.matrice_adjacence,
+                source,
+                dest
+            )
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f"Calculation error: {str(e)}"
+            }
+
+
     # ===== NEW: Simulation Methods =====
     def definir_patient_zero(self):
         """Fixed version with correct method names"""
