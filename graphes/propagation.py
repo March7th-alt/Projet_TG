@@ -179,82 +179,61 @@ def detect_isolated_groups(adj_matrix: List[List[int]]) -> Dict:
     Returns:
         List of sets, where each set contains nodes in an isolated group
     """
+
     n = len(adj_matrix)
-    visited = set()
-    visited = [False] * n
-    components = []
     
-    for node in range(n):
-        if node not in visited:
-            # Start BFS for this component
-            queue = deque([node])
-            visited.add(node)
-        if not visited[node]:
-            queue = [node]
-            visited[node] = True
-            component = set()
-            
-            while queue:
-                current = queue.popleft()
-                current = queue.pop()
-                component.add(current)
-                
-                for neighbor in range(n):
-                    if adj_matrix[current][neighbor] and neighbor not in visited:
-                        visited.add(neighbor)
-                    if adj_matrix[current][neighbor] and not visited[neighbor]:
-                        visited[neighbor] = True
-                        queue.append(neighbor)
-            
-            components.append(component)
-
-    # Critical nodes/edges detection (simplified)
+    # 1. First find all connected components
+    components = detect_components(adj_matrix)
+    original_component_count = len(components)
+    
+    # 2. Find critical nodes
     critical_nodes = set()
-    critical_edges = set()
-
-    # For each node, check if removing it increases components
-    original_components = len(components)
     for node in range(n):
+        # Create a copy with node removed (zero out its row/column)
         temp_adj = [row.copy() for row in adj_matrix]
-        # Remove node (clear its row/column)
         for i in range(n):
             temp_adj[node][i] = 0
             temp_adj[i][node] = 0
         
-        # Recalculate components
-        new_components = len(detect_components(temp_adj))
-        if new_components > original_components:
+        # Check if component count increases
+        if len(detect_components(temp_adj)) > original_component_count:
             critical_nodes.add(node)
     
-    # Similarly for edges (exercise left for you)
-    
+    # 3. Prepare results
     return {
-        'components': components,
+        'components': [list(c) for c in components],
         'critical_nodes': list(critical_nodes),
-        'critical_edges': list(critical_edges),  # Implement similarly
-        'is_critical': len(critical_nodes) > 0
+        'critical_edges': [],  # Implement similarly for edges
+        'is_critical': len(critical_nodes) > 0,
+        'message': ("Critical zones found!" if critical_nodes 
+                   else "No critical zones found")
     }
       
 def detect_components(adj_matrix):
-    """Helper for component detection"""
+    """Helper function to detect connected components using DFS"""
     n = len(adj_matrix)
     visited = [False] * n
     components = []
+    
     for node in range(n):
         if not visited[node]:
-            component = set()
+            # Start new component
             stack = [node]
             visited[node] = True
+            component = set()
+            
             while stack:
                 current = stack.pop()
                 component.add(current)
+                
                 for neighbor in range(n):
                     if adj_matrix[current][neighbor] and not visited[neighbor]:
                         visited[neighbor] = True
                         stack.append(neighbor)
+            
             components.append(component)
+    
     return components
-
 
 def minimum_time_to_infection(adj_matrix: List[List[int]], 
                              sources: List[int], 
