@@ -103,6 +103,20 @@ class ControlPanel(ttk.Frame):
         text="Super Contaminateur",
         command=self.handle_super_contaminateur  # Handler method
     ).pack(fill=tk.X, pady=2)
+        
+        #zone critique/ isolee
+        ttk.Button(
+        proba_frame,
+        text="Détecter Zones Isolées/Critiques",
+        command=self.handle_critical_zones
+    ).pack(fill=tk.X, pady=2)
+        
+        #min time to infect
+        ttk.Button(
+        proba_frame,
+        text="Temps Minimum d'Infection",
+        command=self.handle_min_infection_time
+    ).pack(fill=tk.X, pady=2)
 
 
          # ===== Simulation Section =====
@@ -270,6 +284,112 @@ class ControlPanel(ttk.Frame):
         
         # Show simple messagebox (no visualization)
         messagebox.showinfo("Résultat", message)
+
+
+    def handle_critical_zones(self):
+        """Handles detection of both isolated groups and critical nodes"""
+        try:
+            # Get results from controller
+            result = self.controller.detect_critical_zones()
+            
+            # Build the display message
+            message = [
+                f"=== Résultats d'Analyse ===",
+                f"Groupes isolés: {len(result['components'])}",
+                f"Noeuds critiques: {len(result['critical_nodes'])}"
+            ]
+            
+            # Add component details
+            for i, group in enumerate(result['components'], 1):
+                message.append(f"\nGroupe {i} ({len(group)} nœuds): {sorted(group)}")
+            
+            # Add critical nodes
+            if result['critical_nodes']:
+                message.append("\n\n🔴 Noeuds critiques:")
+                message.append(", ".join(map(str, result['critical_nodes'])))
+            else:
+                message.append("\n🟢 Aucun noeud critique trouvé")
+            
+            # Show scrollable results
+            self.show_scrollable_message(
+                title="Zones Isolées & Critiques",
+                message="\n".join(message)
+            )
+            
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Analyse impossible: {str(e)}")
+
+    def show_scrollable_message(self, title: str, message: str):
+        """Generic scrollable display window"""
+        win = tk.Toplevel()
+        win.title(title)
+        
+        text = tk.Text(win, wrap=tk.WORD, width=60, height=15)
+        scroll = ttk.Scrollbar(win, command=text.yview)
+        text.configure(yscrollcommand=scroll.set)
+        
+        text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        text.insert(tk.END, message)
+        text.config(state=tk.DISABLED)
+        
+        ttk.Button(win, text="Fermer", command=win.destroy).pack(pady=5)
+
+    def handle_min_infection_time(self):
+        """Handles minimum infection time calculation"""
+        # Create parameter input dialog
+        dialog = tk.Toplevel()
+        dialog.title("Paramètres d'Infection")
+        
+        # Source nodes input
+        ttk.Label(dialog, text="Sources (séparées par des virgules):").grid(row=0, column=0, padx=5, pady=5)
+        sources_entry = ttk.Entry(dialog)
+        sources_entry.grid(row=0, column=1, padx=5, pady=5)
+        
+        # Target node input
+        ttk.Label(dialog, text="Cible:").grid(row=1, column=0, padx=5, pady=5)
+        target_spin = ttk.Spinbox(dialog, from_=0, to=0, width=5)
+        target_spin.grid(row=1, column=1, padx=5, pady=5)
+        
+        # Time per interaction
+        ttk.Label(dialog, text="Temps par interaction:").grid(row=2, column=0, padx=5, pady=5)
+        time_entry = ttk.Entry(dialog)
+        time_entry.insert(0, "1.0")  # Default value
+        time_entry.grid(row=2, column=1, padx=5, pady=5)
+
+        def calculate():
+            try:
+                # Get user inputs
+                sources = [int(s.strip()) for s in sources_entry.get().split(",")]
+                target = int(target_spin.get())
+                time_per_step = float(time_entry.get())
+                
+                # Call controller
+                result = self.controller.min_time_to_infection(
+                    sources, 
+                    target,
+                    time_per_step
+                )
+                
+                # Display results
+                if result is not None:
+                    message = f"Temps minimum: {result:.2f} jour(s)"
+                else:
+                    message = "La cible n'est pas atteignable"
+                    
+                messagebox.showinfo("Résultat", message)
+                dialog.destroy()
+                
+            except ValueError:
+                messagebox.showerror("Erreur", "Veuillez entrer des valeurs valides")
+
+        ttk.Button(dialog, text="Calculer", command=calculate).grid(row=3, columnspan=2, pady=10)
+        
+        # Update spinbox range based on current graph
+        if hasattr(self.controller, 'graphe'):
+            max_node = max(0, self.controller.graphe.ordre - 1)
+            target_spin.config(from_=0, to=max_node)
 
 
 

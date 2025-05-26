@@ -2,6 +2,7 @@ import sys
 import os
 import threading
 from time import sleep
+from typing import List, Optional
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import tkinter as tk
@@ -222,6 +223,49 @@ class GrapheApp:
             return super_contaminateur(self.graphe.matrice_adjacence)
         except Exception as e:
             return {'success': False, 'message': f"Error: {str(e)}"}
+
+    def detect_critical_zones(self) -> dict:
+        """Controller method for zone detection"""
+        if not hasattr(self, 'graphe') or self.graphe.ordre == 0:
+            return {
+                'success': False,
+                'message': "Graph not initialized or empty",
+                'components': [],
+                'critical_nodes': []
+            }
+        
+        try:
+            from graphes.propagation import detect_isolated_groups
+            return detect_isolated_groups(self.graphe.matrice_adjacence)
+        except Exception as e:
+            return {
+                'success': False,
+                'message': str(e),
+                'components': [],
+                'critical_nodes': []
+            }
+        
+
+    def min_time_to_infection(self, sources: List[int], target: int, time_per_step: float = 1.0) -> Optional[float]:
+        """Calculates minimum infection propagation time"""
+        if not hasattr(self, 'graphe') or self.graphe.ordre == 0:
+            messagebox.showerror("Erreur", "Le graphe est vide")
+            return None
+            
+        try:
+            from graphes.propagation import minimum_time_to_infection
+            return minimum_time_to_infection(
+                self.graphe.matrice_adjacence,
+                sources,
+                target,
+                time_per_step
+            )
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Calcul impossible: {str(e)}")
+            return None
+
+
+
 
     # ===== NEW: Simulation Methods =====
     def definir_patient_zero(self):

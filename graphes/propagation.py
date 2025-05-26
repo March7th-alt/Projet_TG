@@ -1,6 +1,6 @@
-from collections import deque, defaultdict
+from collections import deque
 import random
-from typing import Dict, List, Tuple, Optional, Set
+from typing import Dict, List, Optional
 
 def minimum_interactions(matrice_adj: List[List[int]], source: int, destination: int) -> Dict:
   
