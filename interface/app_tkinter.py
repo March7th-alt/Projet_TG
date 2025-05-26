@@ -329,14 +329,11 @@ class GrapheApp:
     def run_simulation(self, infection_prob, recovery_prob):
         """Run the propagation simulation"""
         # Convert graph to adjacency list format
-        graph_dict = {
-            node: list(self.graphe.voisinage(node))
-            for node in range(self.graphe.ordre)
-        }
+        adj_matrix = self.graphe.matrice_adjacence
         
         # Get simulation history
         history = simulate_transmission_flows(
-            graph_dict,
+            adj_matrix,
             initial_infected=[self.patient_zero],
             steps=20,
             infection_prob=infection_prob,
