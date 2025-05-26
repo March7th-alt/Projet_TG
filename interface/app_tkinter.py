@@ -186,6 +186,43 @@ class GrapheApp:
             }
 
 
+    def super_contaminateur(self) -> dict:
+        """Controller method for Hamiltonian path finding"""
+        if not hasattr(self, 'graphe'):
+            return {
+                'success': False,
+                'message': "Graph not initialized"
+            }
+            
+        if self.graphe.ordre == 0:
+            return {
+                'success': False,
+                'message': "Empty graph"
+            }
+        
+        try:
+            from graphes.propagation import super_contaminateur
+            return super_contaminateur(self.graphe.matrice_adjacence)
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f"Calculation error: {str(e)}"
+            }
+        
+    def find_hamiltonian_path(self) -> dict:
+        """Controller method for Hamiltonian path finding"""
+        if not hasattr(self, 'graphe'):
+            return {'success': False, 'message': "Graph not initialized"}
+            
+        if self.graphe.ordre == 0:
+            return {'success': False, 'message': "Empty graph"}
+        
+        try:
+            from graphes.propagation import super_contaminateur
+            return super_contaminateur(self.graphe.matrice_adjacence)
+        except Exception as e:
+            return {'success': False, 'message': f"Error: {str(e)}"}
+
     # ===== NEW: Simulation Methods =====
     def definir_patient_zero(self):
         """Fixed version with correct method names"""

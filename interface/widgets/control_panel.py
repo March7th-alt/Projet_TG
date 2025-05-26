@@ -95,6 +95,14 @@ class ControlPanel(ttk.Frame):
         
         ttk.Button(min_int_frame, text="Interactions Min.", 
               command=self.show_min_interactions).pack(side=tk.LEFT, padx=(10,0))
+        
+
+        #Super contaminateur
+        ttk.Button(
+        proba_frame,
+        text="Super Contaminateur",
+        command=self.handle_super_contaminateur  # Handler method
+    ).pack(fill=tk.X, pady=2)
 
 
          # ===== Simulation Section =====
@@ -245,6 +253,23 @@ class ControlPanel(ttk.Frame):
         except Exception as e:
             messagebox.showerror("Erreur", f"Erreur inattendue: {str(e)}")
 
+
+    def handle_super_contaminateur(self):
+        """Handles button click and shows results"""
+        # Get results from controller
+        result = self.controller.find_hamiltonian_path()
+        
+        # Prepare message
+        if result.get('success'):
+            message = (
+                f"{result.get('message', '')}\n"
+                f"Chemin: {result['path']}"
+            )
+        else:
+            message = f"Aucun chemin trouvé\n\n{result.get('message', '')}"
+        
+        # Show simple messagebox (no visualization)
+        messagebox.showinfo("Résultat", message)
 
 
 

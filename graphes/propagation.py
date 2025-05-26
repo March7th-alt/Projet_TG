@@ -71,12 +71,12 @@ def super_contaminateur(adj_matrix: List[List[int]]) -> dict:
     result = {
         'success': False,
         'path': [],
-        'message': "No Hamiltonian path found",
+        'message': "Aucun super contaminateur trouvé",
         'node_count': len(adj_matrix)
     }
 
     if not adj_matrix:
-        result['message'] = "Empty graph"
+        result['message'] = "Graphe vide"
         return result
 
     def backtrack(current: int, path: List[int], visited: List[bool]) -> Optional[List[int]]:
@@ -116,7 +116,7 @@ def super_contaminateur(adj_matrix: List[List[int]]) -> dict:
             result.update({
                 'success': True,
                 'path': hamiltonian_path,
-                'message': f"Found Hamiltonian path with {len(hamiltonian_path)} nodes"
+                'message': f"Super contaminateur de longueur {len(hamiltonian_path)} trouvé"
             })
             return result
     
