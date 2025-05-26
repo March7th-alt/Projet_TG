@@ -336,7 +336,7 @@ class GrapheApp:
         history = simulate_transmission_flows(
             adj_matrix,
             initial_infected=[self.patient_zero],
-            steps=20,
+            steps=10,
             infection_prob=infection_prob,
             recovery_prob=recovery_prob
         )
@@ -425,7 +425,7 @@ class GrapheApp:
         history = self.simulate_with_vaccination(
             self.graphe.matrice_adjacence,
             [self.patient_zero],
-            20,
+            10,
             infection_prob,
             recovery_prob,
             [self.vaccinated_node]
