@@ -4,6 +4,8 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import networkx as nx
 
+#Fichier les fcts de visualisation/mise a jour des couleurs des noeuds etc...
+
 class GraphWidget(ttk.Frame):
     def __init__(self, parent):
         super().__init__(parent)

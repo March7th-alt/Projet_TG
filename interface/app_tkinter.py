@@ -1,7 +1,9 @@
+import random
 import sys
 import os
 import threading
 from time import sleep
+from typing import List, Optional
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import tkinter as tk
@@ -11,6 +13,8 @@ from graphes.visualisation import VisualisationGraphe
 from graphes.propagation import simulate_transmission_flows
 from interface.widgets.control_panel import ControlPanel
 from interface.widgets.graph_widget import GraphWidget
+
+#Ce fichier a comme module: les fonction de l'interface, les fonctions pour les affichage des message + lancer la simulation
 
 class GrapheApp:
     def __init__(self, root):
@@ -45,7 +49,6 @@ class GrapheApp:
 
         self.dessiner_graphe()
 
-    # ===== Existing Graph Methods (unchanged) =====
     def dessiner_graphe(self):
         if self.graphe.ordre > 0:
             self.visualisation = VisualisationGraphe(self.graphe)
@@ -157,7 +160,113 @@ class GrapheApp:
             self.graph_widget.clear()
             self.dessiner_graphe()
 
-    # ===== NEW: Simulation Methods =====
+
+    def minimum_interactions(self, source, dest):
+        """Controller method with proper error handling"""
+        if not hasattr(self, 'graphe'):
+            return {
+                'success': False,
+                'message': "Graph not initialized"
+            }
+            
+        if self.graphe.ordre == 0:
+            return {
+                'success': False,
+                'message': "Empty graph"
+            }
+        
+        try:
+            from graphes.propagation import minimum_interactions
+            return minimum_interactions(
+                self.graphe.matrice_adjacence,
+                source,
+                dest
+            )
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f"Calculation error: {str(e)}"
+            }
+
+
+    def super_contaminateur(self) -> dict:
+        """Controller method for Hamiltonian path finding"""
+        if not hasattr(self, 'graphe'):
+            return {
+                'success': False,
+                'message': "Graph not initialized"
+            }
+            
+        if self.graphe.ordre == 0:
+            return {
+                'success': False,
+                'message': "Empty graph"
+            }
+        
+        try:
+            from graphes.propagation import super_contaminateur
+            return super_contaminateur(self.graphe.matrice_adjacence)
+        except Exception as e:
+            return {
+                'success': False,
+                'message': f"Calculation error: {str(e)}"
+            }
+        
+    def find_hamiltonian_path(self) -> dict:
+        """Controller method for Hamiltonian path finding"""
+        if not hasattr(self, 'graphe'):
+            return {'success': False, 'message': "Graph not initialized"}
+            
+        if self.graphe.ordre == 0:
+            return {'success': False, 'message': "Empty graph"}
+        
+        try:
+            from graphes.propagation import super_contaminateur
+            return super_contaminateur(self.graphe.matrice_adjacence)
+        except Exception as e:
+            return {'success': False, 'message': f"Error: {str(e)}"}
+
+    def detect_critical_zones(self) -> dict:
+        """Controller method for zone detection"""
+        if not hasattr(self, 'graphe') or self.graphe.ordre == 0:
+            return {
+                'success': False,
+                'message': "Graph not initialized or empty",
+                'components': [],
+                'critical_nodes': []
+            }
+        
+        try:
+            from graphes.propagation import detect_isolated_groups
+            return detect_isolated_groups(self.graphe.matrice_adjacence)
+        except Exception as e:
+            return {
+                'success': False,
+                'message': str(e),
+                'components': [],
+                'critical_nodes': []
+            }
+        
+
+    def min_time_to_infection(self, sources: List[int], target: int, time_per_step: float = 1.0) -> Optional[float]:
+        """Calculates minimum infection propagation time"""
+        if not hasattr(self, 'graphe') or self.graphe.ordre == 0:
+            messagebox.showerror("Erreur", "Le graphe est vide")
+            return None
+            
+        try:
+            from graphes.propagation import minimum_time_to_infection
+            return minimum_time_to_infection(
+                self.graphe.matrice_adjacence,
+                sources,
+                target,
+                time_per_step
+            )
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Calcul impossible: {str(e)}")
+            return None
+
+    #Simulation Methods 
     def definir_patient_zero(self):
         """Fixed version with correct method names"""
         if not hasattr(self, 'root') or not tk._default_root:
@@ -216,21 +325,17 @@ class GrapheApp:
         )
         self.simulation_thread.start()
 
-    def run_simulation(self, infection_prob, recovery_prob):
+    def run_simulation(self, infection_prob):
         """Run the propagation simulation"""
         # Convert graph to adjacency list format
-        graph_dict = {
-            node: list(self.graphe.voisinage(node))
-            for node in range(self.graphe.ordre)
-        }
+        adj_matrix = self.graphe.matrice_adjacence
         
         # Get simulation history
         history = simulate_transmission_flows(
-            graph_dict,
+            adj_matrix,
             initial_infected=[self.patient_zero],
-            steps=20,
+            steps=10,
             infection_prob=infection_prob,
-            recovery_prob=recovery_prob
         )
         
         # Update visualization for each step
@@ -277,6 +382,108 @@ class GrapheApp:
                     
         if hasattr(self, 'control_panel'):
             self.root.after(0, self.control_panel.update_info_label, "Prêt")
+
+    def vaccinate_highest_degree(self):
+        """Vaccinate the node with the highest degree using adjacency matrix"""
+        if self.graphe.ordre == 0:
+            messagebox.showwarning("Warning", "Graph is empty!")
+            return
+        
+        # Find node with highest degree (sum of row in adjacency matrix)
+        max_degree = -1
+        vaccinated_node = 0
+        for node in range(self.graphe.ordre):
+            degree = sum(self.graphe.matrice_adjacence[node])
+            if degree > max_degree:
+                max_degree = degree
+                vaccinated_node = node
+        
+        self.vaccinated_node = vaccinated_node  # Store the vaccinated node
+        self.graph_widget.update_node_color(vaccinated_node, "yellow")
+        self.control_panel.update_info_label(f"Vaccinated node: {vaccinated_node} (Degree: {max_degree})")
+
+
+    def simulate_after_vaccination(self):
+        """Run simulation with vaccination using adjacency matrix"""
+        if not hasattr(self, 'vaccinated_node'):
+            messagebox.showwarning("Warning", "Please vaccinate a node first!")
+            return
+        
+        if self.patient_zero is None:
+            messagebox.showwarning("Warning", "Please select Patient Zero first!")
+            return
+        
+        # Get parameters from control panel
+        infection_prob,= self.control_panel.get_simulation_parameters()
+        if infection_prob is None:
+            return
+        
+        # Run simulation with adjacency matrix
+        history = self.simulate_with_vaccination(
+            self.graphe.matrice_adjacence,
+            [self.patient_zero],
+            10,
+            infection_prob,
+            [self.vaccinated_node]
+        )
+        
+        # Update visualization
+        for step, states in enumerate(history):
+            for node, state in enumerate(states):
+                color = "red" if state == "infected" else "green" if state == "immune" else "blue"
+                if node == self.vaccinated_node:
+                    color = "yellow"  # Keep vaccinated node yellow
+                self.graph_widget.update_node_color(node, color)
+            
+            infected_count = states.count("infected")
+            self.control_panel.update_info_label(
+                f"Step {step+1}: {infected_count} infected | Node {self.vaccinated_node} vaccinated"
+            )
+            
+            self.root.update()
+            sleep(1)
+
+    def simulate_with_vaccination(self, adj_matrix, initial_infected, steps, infection_prob, recovery_prob, vaccinated_nodes):
+        """Simulation using adjacency matrix with vaccination"""
+        num_nodes = len(adj_matrix)
+        states = ["healthy"] * num_nodes
+        
+        # Set initial states
+        for node in initial_infected:
+            states[node] = "infected"
+        for node in vaccinated_nodes:
+            states[node] = "immune"
+        
+        history = [states.copy()]
+        
+        for _ in range(steps):
+            new_states = states.copy()
+            
+            for node in range(num_nodes):
+                # Skip vaccinated nodes
+                if node in vaccinated_nodes:
+                    continue
+                    
+                # Recovery logic
+                if states[node] == "infected" and random.random() < recovery_prob:
+                    new_states[node] = "immune"
+                    continue
+                    
+                # Infection logic
+                if states[node] == "healthy":
+                    for neighbor in range(num_nodes):
+                        if (adj_matrix[node][neighbor] and  # There's a connection
+                            states[neighbor] == "infected" and 
+                            neighbor not in vaccinated_nodes and  # Can't spread from vaccinated
+                            random.random() < infection_prob):
+                            new_states[node] = "infected"
+                            break
+            
+            states = new_states
+            history.append(states.copy())
+        
+        return history
+
 
 if __name__ == "__main__":
     root = tk.Tk()

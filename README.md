@@ -1,15 +1,38 @@
-# PROJET_TG - Simulation de propagation épidémique sur réseaux sociaux
+PROJET DE THEORIE DES GRAPHES - SIMULATION DE PROPAGATION
 
-## Description
-Ce projet modélise la propagation d'une épidémie dans un réseau social en utilisant la théorie des graphes.
-
-## Fonctionnalités
-- Création de réseaux sociaux aléatoires
-- Simulation de propagation avec patient zéro
-- Identification des super-propagateurs
-- Stratégies de vaccination optimale
+Fonctionnalités principales :
+- Création/modification de graphes (nœuds/arêtes)
+- Algorithmes de graphes (Eulerien, Hamiltonien)
+- Modèles de propagation épidémique (SIR/SIS)
 - Visualisation interactive
 
-## Installation
-```bash
-pip install -r requirements.txt
+INSTALLATION :
+1. Python 3.8+ requis
+2. Installer les dépendances :
+   pip install networkx matplotlib numpy
+
+UTILISATION :
+1. Exécuter main.py :
+   python main.py
+
+2. Fonctionnalités de l'interface :
+   - Onglet "Création" : Ajouter/supprimer des éléments
+   - Onglet "Algorithmes" : Exécuter des analyses
+   - Onglet "Simulation" : Configurer les paramètres de propagation
+
+FICHIERS IMPORTANTS :
+- graphes/core.py : Structure de données des graphes
+- graphes/propagation.py : Modèles de contagion
+- interface/app_tkinter.py : Interface graphique
+
+EXEMPLE DE SIMULATION :
+1. Sélectionner "Patient Zéro"
+2. Choisir les probabilités d'infection/rétablissement
+3. Lancer la simulation avec "Démarrer"
+
+DEPENDANCES :
+- networkx==2.6.3
+- matplotlib==3.4.3
+- numpy==1.21.2
+
+LICENCE : MIT

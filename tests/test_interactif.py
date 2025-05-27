@@ -7,6 +7,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from graphes.core import Graphe
 from graphes.visualisation import VisualisationGraphe
 import time
+
+#Tester nos fonctions core.py
+
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
