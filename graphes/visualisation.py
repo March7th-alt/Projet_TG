@@ -11,25 +11,25 @@ class VisualisationGraphe:
     
     def __init__(self, graphe: Graphe):
         # Initialise la visualisation avec un graphe existant
-        #
-        # Args:
+
+        # parametre
         #     graphe (Graphe): Instance de la classe Graphe à visualiser
         self.graphe = graphe
         self.nx_graphe = self._convertir_vers_networkx()
         
     def _convertir_vers_networkx(self) -> nx.Graph:
         # Convertit la matrice d'adjacence en un graphe networkx
-        #
-        # Returns:
+
+        # Retourner:
         #     nx.Graph: Graphe networkx correspondant
         G = nx.Graph()
         
-        # Ajout des sommets
+        # Ajouter des sommets
         G.add_nodes_from(range(self.graphe.ordre))
         
-        # Ajout des arêtes
+        # Ajouter des arêtes
         for i in range(self.graphe.ordre):
-            for j in range(i, self.graphe.ordre):  # On évite les doublons car graphe non orienté
+            for j in range(i, self.graphe.ordre):  #on évite les doublons car graphe non orienté
                 if self.graphe.matrice_adjacence[i][j] == 1:
                     G.add_edge(i, j)
                     
@@ -37,8 +37,8 @@ class VisualisationGraphe:
     
     def afficher_graphe(self, titre: str = "Graphe", avec_labels: bool = True, node_size: int = 500) -> None:
         # Affiche le graphe avec matplotlib
-        #
-        # Args:
+
+        # parametre:
         #     titre (str): Titre du graphe
         #     avec_labels (bool): Si True, affiche les labels des sommets
         #     node_size (int): Taille des nœuds
@@ -53,8 +53,8 @@ class VisualisationGraphe:
     
     def afficher_chemin(self, chemin: List[int], titre: str = "Chemin dans le graphe") -> None:
         # Affiche un chemin particulier dans le graphe
-        #
-        # Args:
+
+        # parametre:
         #     chemin (List[int]): Liste des sommets du chemin
         #     titre (str): Titre du graphique
         if not chemin:
@@ -96,8 +96,8 @@ class VisualisationGraphe:
 
 def visualiser_graphe_depuis_matrice(matrice: List[List[int]]) -> None:
     # Fonction utilitaire pour visualiser directement un graphe depuis une matrice d'adjacence
-    #
-    # Args:
+
+    # parametre
     #     matrice (List[List[int]]): Matrice d'adjacence
     g = Graphe(len(matrice))
     g.matrice_adjacence = matrice

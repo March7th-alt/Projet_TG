@@ -8,7 +8,7 @@ class ControlPanel(ttk.Frame):
         self.setup_ui()
 
     def setup_ui(self):
-        """Initialise l'interface du panneau de contrôle"""
+        #Initialise l'interface du panneau de contrôle
         # Section création de graphe
         creation_frame = ttk.LabelFrame(self, text="Création de Graphe")
         creation_frame.pack(fill=tk.X, padx=5, pady=5)
@@ -48,7 +48,7 @@ class ControlPanel(ttk.Frame):
         # Nouveau bouton : Réinitialiser Interface
         ttk.Button(creation_frame, text="Réinitialiser Interface", command=self.reinitialiser_interface).pack(fill=tk.X, padx=5, pady=5)
 
-        # Section algorithmes
+        #section algo
         algo_frame = ttk.LabelFrame(self, text="Algorithmes")
         algo_frame.pack(fill=tk.X, padx=5, pady=5)
 
@@ -77,7 +77,7 @@ class ControlPanel(ttk.Frame):
         self.sommet_entry.pack(side=tk.LEFT, padx=5)
         ttk.Button(voisin_frame, text="Afficher", command=self.afficher_voisins).pack(side=tk.LEFT, padx=5)
 
-        #Section Propagation
+        #section propagation
         proba_frame = ttk.LabelFrame(self, text="Analayse de Propagation")
         proba_frame.pack(fill=tk.X, padx=5, pady=5)
 
@@ -97,28 +97,16 @@ class ControlPanel(ttk.Frame):
               command=self.show_min_interactions).pack(side=tk.LEFT, padx=(10,0))
 
         #Super contaminateur
-        ttk.Button(
-        proba_frame,
-        text="Super Contaminateur",
-        command=self.handle_super_contaminateur  # Handler method
-    ).pack(fill=tk.X, pady=2)
+        ttk.Button(proba_frame, text="Super Contaminateur", command=self.handle_super_contaminateur).pack(fill=tk.X, pady=2)
         
         #zone critique/ isolee
-        ttk.Button(
-        proba_frame,
-        text="Détecter Zones Isolées/Critiques",
-        command=self.handle_critical_zones
-    ).pack(fill=tk.X, pady=2)
+        ttk.Button(proba_frame, text="Détecter Zones Isolées/Critiques", command=self.handle_critical_zones).pack(fill=tk.X, pady=2)
         
         #min time to infect
-        ttk.Button(
-        proba_frame,
-        text="Temps Minimum d'Infection",
-        command=self.handle_min_infection_time
-    ).pack(fill=tk.X, pady=2)
+        ttk.Button(proba_frame, text="Temps Minimum d'Infection", command=self.handle_min_infection_time).pack(fill=tk.X, pady=2)
 
 
-         # ===== Simulation Section =====
+         #section simulation
         sim_frame = ttk.LabelFrame(self, text="Simulation de Propagation", padding=5)
         sim_frame.pack(fill=tk.X, padx=5, pady=5)
 
@@ -129,19 +117,15 @@ class ControlPanel(ttk.Frame):
         ttk.Label(patient_zero_frame, text="Patient Zéro:").pack(side=tk.LEFT)
         self.patient_zero_entry = ttk.Entry(patient_zero_frame, width=5)
         self.patient_zero_entry.pack(side=tk.LEFT, padx=5)
-        ttk.Button(patient_zero_frame, text="Définir", 
-                  command=self.controller.definir_patient_zero).pack(side=tk.LEFT)
+        ttk.Button(patient_zero_frame, text="Définir", command=self.controller.definir_patient_zero).pack(side=tk.LEFT)
 
         # Simulation controls
         sim_controls = ttk.Frame(sim_frame)
         sim_controls.pack(fill=tk.X, pady=2)
         
-        ttk.Button(sim_controls, text="Démarrer", 
-                  command=self.controller.start_simulation).pack(side=tk.LEFT, expand=True, padx=2)
-        ttk.Button(sim_controls, text="Arrêter", 
-                  command=self.controller.stop_simulation).pack(side=tk.LEFT, expand=True, padx=2)
-        ttk.Button(sim_controls, text="Réinitialiser", 
-                  command=self.controller.reset_simulation).pack(side=tk.LEFT, expand=True, padx=2)
+        ttk.Button(sim_controls, text="Démarrer", command=self.controller.start_simulation).pack(side=tk.LEFT, expand=True, padx=2)
+        ttk.Button(sim_controls, text="Arrêter", command=self.controller.stop_simulation).pack(side=tk.LEFT, expand=True, padx=2)
+        ttk.Button(sim_controls, text="Réinitialiser", command=self.controller.reset_simulation).pack(side=tk.LEFT, expand=True, padx=2)
 
         # Simulation parameters
         param_frame = ttk.Frame(sim_frame)
@@ -155,11 +139,9 @@ class ControlPanel(ttk.Frame):
         vacc_frame = ttk.Frame(sim_frame)
         vacc_frame.pack(fill=tk.X, pady=5)
 
-        ttk.Button(vacc_frame, text="Vaccinate Highest Degree", 
-              command=self.controller.vaccinate_highest_degree).pack(side=tk.LEFT, padx=2)
+        ttk.Button(vacc_frame, text="Vaccinate Highest Degree", command=self.controller.vaccinate_highest_degree).pack(side=tk.LEFT, padx=2)
     
-        ttk.Button(vacc_frame, text="Simulate After Vaccination", 
-              command=self.controller.simulate_after_vaccination).pack(side=tk.LEFT, padx=2)
+        ttk.Button(vacc_frame, text="Simulate After Vaccination", command=self.controller.simulate_after_vaccination).pack(side=tk.LEFT, padx=2)
 
         # Section informations
         info_frame = ttk.LabelFrame(self, text="Informations")
@@ -169,7 +151,7 @@ class ControlPanel(ttk.Frame):
         self.info_label.pack(pady=5)
 
     def show_adjacency_matrix(self):
-        """Display the adjacency matrix in a popup window"""
+        #afficher matrice d'adjacence
         if not hasattr(self.controller, 'graphe') or self.controller.graphe.ordre == 0:
             messagebox.showinfo("Info", "Le graphe est vide.")
             return
@@ -220,14 +202,10 @@ class ControlPanel(ttk.Frame):
         text.config(state=tk.DISABLED)
         
         # Add close button
-        ttk.Button(
-            popup,
-            text="Fermer",
-            command=popup.destroy
-        ).pack(pady=5)
+        ttk.Button(popup, text="Fermer", command=popup.destroy).pack(pady=5)
 
     def show_graph_order(self):
-        """Display the graph order (number of vertices)"""
+        #afficher ordre de graphe
         if not hasattr(self.controller, 'graphe'):
             messagebox.showinfo("Ordre du Graphe", "Aucun graphe n'est chargé")
             return
@@ -239,7 +217,7 @@ class ControlPanel(ttk.Frame):
         )
 
     def show_min_interactions(self):
-        """Handle minimum interactions button with proper error checking"""
+        #afficher min interactions pour infecter
         if not hasattr(self.controller, 'graphe') or self.controller.graphe.ordre == 0:
             messagebox.showwarning("Erreur", "Le graphe est vide!")
             return
@@ -277,7 +255,7 @@ class ControlPanel(ttk.Frame):
 
 
     def handle_super_contaminateur(self):
-        """Handles button click and shows results"""
+        #afficher chemin hamiltonien (super contaminateur)
         # Get results from controller
         result = self.controller.find_hamiltonian_path()
         
@@ -295,7 +273,7 @@ class ControlPanel(ttk.Frame):
 
 
     def handle_critical_zones(self):
-        """Handles detection of both isolated groups and critical nodes"""
+        # Afficher les zone critique et isole
         try:
             # Get results from controller
             result = self.controller.detect_critical_zones()
@@ -328,7 +306,7 @@ class ControlPanel(ttk.Frame):
             messagebox.showerror("Erreur", f"Analyse impossible: {str(e)}")
 
     def show_scrollable_message(self, title: str, message: str):
-        """Generic scrollable display window"""
+        #une fentre scrollable
         win = tk.Toplevel()
         win.title(title)
         
@@ -345,7 +323,8 @@ class ControlPanel(ttk.Frame):
         ttk.Button(win, text="Fermer", command=win.destroy).pack(pady=5)
 
     def handle_min_infection_time(self):
-        """Handles minimum infection time calculation"""
+        #minimum infection time
+
         # Create parameter input dialog
         dialog = tk.Toplevel()
         dialog.title("Paramètres d'Infection")
@@ -399,13 +378,8 @@ class ControlPanel(ttk.Frame):
             max_node = max(0, self.controller.graphe.ordre - 1)
             target_spin.config(from_=0, to=max_node)
 
-
-
-
-
-
     def get_patient_zero_input(self):
-        """Get the patient zero node from entry field"""
+        #Donner la main au user pour donner patient
         try:
             return int(self.patient_zero_entry.get())
         except ValueError:
@@ -413,30 +387,27 @@ class ControlPanel(ttk.Frame):
             return None
 
     def get_simulation_parameters(self):
-        """Returns the current simulation parameters"""
+        #les parametre
         try:
             infection = float(self.infection_prob.get())
-            recovery = 0.0
-            return infection, recovery
+            return infection
         except ValueError:
             messagebox.showerror("Erreur", "Paramètres de simulation invalides")
-            return None, None
+            return None
 
     def disable_simulation_controls(self):
-        """Disable simulation buttons during simulation"""
         for child in self.winfo_children():
             if isinstance(child, ttk.Button):
                 child.config(state=tk.DISABLED)
 
     def enable_simulation_controls(self):
-        """Enable simulation buttons"""
         for child in self.winfo_children():
             if isinstance(child, ttk.Button):
                 child.config(state=tk.NORMAL)
 
-    # ===== Existing methods remain unchanged =====
+
     def supprimer_sommet_specifique(self):
-        """Gère la suppression d'un sommet spécifique"""
+        #Gère la suppression d'un sommet spécifique
         try:
             sommet = int(self.sommet_a_supprimer.get())
             if hasattr(self.controller, 'supprimer_sommet'):
@@ -447,7 +418,7 @@ class ControlPanel(ttk.Frame):
             messagebox.showerror("Erreur", "Veuillez entrer un numéro de sommet valide")
 
     def demander_parametres_graphe_aleatoire(self):
-        """Ouvre une boîte de dialogue pour les paramètres du graphe aléatoire"""
+        #Ouvre une boîte de dialogue pour les paramètres du graphe aléatoire
         dialog = tk.Toplevel()
         dialog.title("Paramètres du graphe aléatoire")
         
@@ -475,7 +446,7 @@ class ControlPanel(ttk.Frame):
         tk.Button(dialog, text="Générer", command=generer).grid(row=2, columnspan=2, pady=10)
 
     def supprimer_dernier_sommet(self):
-        """Gère la suppression du dernier sommet"""
+        #Gère la suppression du dernier sommet
         if hasattr(self.controller, 'supprimer_dernier_sommet'):
             self.controller.supprimer_dernier_sommet()
         else:
@@ -484,7 +455,7 @@ class ControlPanel(ttk.Frame):
                 self.controller.supprimer_sommet(sommet)
 
     def verifier_chemin(self):
-        """Gère la vérification de chemin"""
+        #Gère la vérification de chemin
         k = self.get_selected_length()
         if k is not None:
             s1, s2 = self.get_selected_vertices()
@@ -492,13 +463,13 @@ class ControlPanel(ttk.Frame):
                 self.controller.verifier_chemin_longueur(s1, s2, k)
 
     def afficher_voisins(self):
-        """Gère l'affichage des voisins"""
+        #Gère l'affichage des voisins
         sommet = self.get_selected_sommet()
         if sommet is not None:
             self.controller.afficher_voisins(sommet)
 
     def update_spinboxes(self, max_val):
-        """Met à jour les spinboxes"""
+        #Met à jour les spinboxes
         self.edge_s1.configure(from_=0, to=max_val)
         self.edge_s2.configure(from_=0, to=max_val)
         self.sommet_a_supprimer.configure(from_=0, to=max_val)
@@ -507,7 +478,7 @@ class ControlPanel(ttk.Frame):
         self.sommet_a_supprimer.set(0)
 
     def update_info_label(self, text):
-        """Met à jour le label d'information"""
+        #Met à jour le label d'information
         self.info_label.config(text=text)
 
     def get_selected_vertices(self):
@@ -544,7 +515,7 @@ class ControlPanel(ttk.Frame):
             self.controller.supprimer_arete(s1, s2)
 
     def reinitialiser_interface(self):
-        """Réinitialise l'interface : vide les entrées, supprime le graphe, etc."""
+        #Réinitialise l'interface : vide les entrées, supprime le graphe, etc.
         if hasattr(self.controller, 'reinitialiser_graphe'):
             self.controller.reinitialiser_graphe()
 

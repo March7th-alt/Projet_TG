@@ -8,6 +8,8 @@ from graphes.core import Graphe
 from graphes.visualisation import VisualisationGraphe
 import unittest
 
+#Tester nos fonctions core.py
+
 class TestGraphe(unittest.TestCase):
     def setUp(self):
         self.g = Graphe(3)  # Graphe avec 3 sommets (0, 1, 2)

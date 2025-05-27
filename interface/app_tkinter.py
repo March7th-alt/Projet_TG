@@ -14,6 +14,8 @@ from graphes.propagation import simulate_transmission_flows
 from interface.widgets.control_panel import ControlPanel
 from interface.widgets.graph_widget import GraphWidget
 
+#Ce fichier a comme module: les fonction de l'interface, les fonctions pour les affichage des message + lancer la simulation
+
 class GrapheApp:
     def __init__(self, root):
         self.root = root
@@ -47,7 +49,6 @@ class GrapheApp:
 
         self.dessiner_graphe()
 
-    # ===== Existing Graph Methods (unchanged) =====
     def dessiner_graphe(self):
         if self.graphe.ordre > 0:
             self.visualisation = VisualisationGraphe(self.graphe)
@@ -265,10 +266,7 @@ class GrapheApp:
             messagebox.showerror("Erreur", f"Calcul impossible: {str(e)}")
             return None
 
-
-
-
-    # ===== NEW: Simulation Methods =====
+    #Simulation Methods 
     def definir_patient_zero(self):
         """Fixed version with correct method names"""
         if not hasattr(self, 'root') or not tk._default_root:
@@ -327,7 +325,7 @@ class GrapheApp:
         )
         self.simulation_thread.start()
 
-    def run_simulation(self, infection_prob, recovery_prob):
+    def run_simulation(self, infection_prob):
         """Run the propagation simulation"""
         # Convert graph to adjacency list format
         adj_matrix = self.graphe.matrice_adjacence
@@ -338,7 +336,6 @@ class GrapheApp:
             initial_infected=[self.patient_zero],
             steps=10,
             infection_prob=infection_prob,
-            recovery_prob=recovery_prob
         )
         
         # Update visualization for each step
@@ -417,8 +414,8 @@ class GrapheApp:
             return
         
         # Get parameters from control panel
-        infection_prob, recovery_prob = self.control_panel.get_simulation_parameters()
-        if infection_prob is None or recovery_prob is None:
+        infection_prob,= self.control_panel.get_simulation_parameters()
+        if infection_prob is None:
             return
         
         # Run simulation with adjacency matrix
@@ -427,7 +424,6 @@ class GrapheApp:
             [self.patient_zero],
             10,
             infection_prob,
-            recovery_prob,
             [self.vaccinated_node]
         )
         
