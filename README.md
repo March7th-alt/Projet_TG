@@ -12,8 +12,7 @@ INSTALLATION :
    pip install networkx matplotlib numpy
 
 UTILISATION :
-1. Exécuter main.py :
-   python main.py
+1. Exécuter app_tkinter.py 
 
 2. Fonctionnalités de l'interface :
    - Onglet "Création" : Ajouter/supprimer des éléments
@@ -34,5 +33,3 @@ DEPENDANCES :
 - networkx==2.6.3
 - matplotlib==3.4.3
 - numpy==1.21.2
-
-LICENCE : MIT
