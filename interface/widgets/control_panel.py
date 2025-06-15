@@ -227,7 +227,7 @@ class ControlPanel(ttk.Frame):
         ).pack(pady=5)
 
     def show_graph_order(self):
-        """Display the graph order (number of vertices)"""
+        """Display the graph order"""
         if not hasattr(self.controller, 'graphe'):
             messagebox.showinfo("Ordre du Graphe", "Aucun graphe n'est chargé")
             return
@@ -239,7 +239,7 @@ class ControlPanel(ttk.Frame):
         )
 
     def show_min_interactions(self):
-        """Handle minimum interactions button with proper error checking"""
+        """Handle minimum interactions button"""
         if not hasattr(self.controller, 'graphe') or self.controller.graphe.ordre == 0:
             messagebox.showwarning("Erreur", "Le graphe est vide!")
             return
@@ -295,7 +295,7 @@ class ControlPanel(ttk.Frame):
 
 
     def handle_critical_zones(self):
-        """Handles detection of both isolated groups and critical nodes"""
+        """Handles detection of both isolated groups and critical nodes (altho its kinda wrong)"""
         try:
             # Get results from controller
             result = self.controller.detect_critical_zones()
@@ -401,9 +401,6 @@ class ControlPanel(ttk.Frame):
 
 
 
-
-
-
     def get_patient_zero_input(self):
         """Get the patient zero node from entry field"""
         try:
@@ -434,7 +431,6 @@ class ControlPanel(ttk.Frame):
             if isinstance(child, ttk.Button):
                 child.config(state=tk.NORMAL)
 
-    # ===== Existing methods remain unchanged =====
     def supprimer_sommet_specifique(self):
         """Gère la suppression d'un sommet spécifique"""
         try:

@@ -47,7 +47,6 @@ class GrapheApp:
 
         self.dessiner_graphe()
 
-    # ===== Existing Graph Methods (unchanged) =====
     def dessiner_graphe(self):
         if self.graphe.ordre > 0:
             self.visualisation = VisualisationGraphe(self.graphe)
@@ -161,7 +160,7 @@ class GrapheApp:
 
 
     def minimum_interactions(self, source, dest):
-        """Controller method with proper error handling"""
+        """Controller method"""
         if not hasattr(self, 'graphe'):
             return {
                 'success': False,
@@ -268,9 +267,8 @@ class GrapheApp:
 
 
 
-    # ===== NEW: Simulation Methods =====
+    # ===== Simulation Methods =====
     def definir_patient_zero(self):
-        """Fixed version with correct method names"""
         if not hasattr(self, 'root') or not tk._default_root:
             return
                 
@@ -312,7 +310,7 @@ class GrapheApp:
 
         # Get parameters from control panel
         infection_prob, recovery_prob = self.control_panel.get_simulation_parameters()
-        if infection_prob is None or recovery_prob is None:
+        if infection_prob is None or recovery_prob is None: #again ignore the recovery prob please
             return
 
         # Disable controls during simulation
@@ -329,7 +327,6 @@ class GrapheApp:
 
     def run_simulation(self, infection_prob, recovery_prob):
         """Run the propagation simulation"""
-        # Convert graph to adjacency list format
         adj_matrix = self.graphe.matrice_adjacence
         
         # Get simulation history
@@ -373,7 +370,6 @@ class GrapheApp:
         self.control_panel.enable_simulation_controls()
 
     def reset_simulation(self):
-        """Fixed reset using update_node_color"""
         self.stop_simulation()
         if hasattr(self, 'patient_zero') and self.patient_zero is not None:
             self.root.after(0, self.graph_widget.update_node_color, self.patient_zero, "skyblue")

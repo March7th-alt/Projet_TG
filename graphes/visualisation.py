@@ -11,7 +11,7 @@ class VisualisationGraphe:
     
     def __init__(self, graphe: Graphe):
         # Initialise la visualisation avec un graphe existant
-        #
+
         # Args:
         #     graphe (Graphe): Instance de la classe Graphe à visualiser
         self.graphe = graphe
@@ -19,7 +19,7 @@ class VisualisationGraphe:
         
     def _convertir_vers_networkx(self) -> nx.Graph:
         # Convertit la matrice d'adjacence en un graphe networkx
-        #
+
         # Returns:
         #     nx.Graph: Graphe networkx correspondant
         G = nx.Graph()
@@ -37,7 +37,7 @@ class VisualisationGraphe:
     
     def afficher_graphe(self, titre: str = "Graphe", avec_labels: bool = True, node_size: int = 500) -> None:
         # Affiche le graphe avec matplotlib
-        #
+
         # Args:
         #     titre (str): Titre du graphe
         #     avec_labels (bool): Si True, affiche les labels des sommets
@@ -53,7 +53,7 @@ class VisualisationGraphe:
     
     def afficher_chemin(self, chemin: List[int], titre: str = "Chemin dans le graphe") -> None:
         # Affiche un chemin particulier dans le graphe
-        #
+
         # Args:
         #     chemin (List[int]): Liste des sommets du chemin
         #     titre (str): Titre du graphique
@@ -96,7 +96,7 @@ class VisualisationGraphe:
 
 def visualiser_graphe_depuis_matrice(matrice: List[List[int]]) -> None:
     # Fonction utilitaire pour visualiser directement un graphe depuis une matrice d'adjacence
-    #
+    
     # Args:
     #     matrice (List[List[int]]): Matrice d'adjacence
     g = Graphe(len(matrice))

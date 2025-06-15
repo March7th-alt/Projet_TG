@@ -289,7 +289,7 @@ def simulate_transmission_flows(adj_matrix: List[List[int]],
         initial_infected: List of initially infected individuals
         steps: Number of time steps to simulate
         infection_prob: Probability of transmission per contact
-        recovery_prob: Probability an infected individual recovers and becomes immune
+        recovery_prob: Probability an infected individual recovers and becomes immune (now deleted because later found out we dont need recovery)
         
     Returns:
         List of state dictionaries for each time step

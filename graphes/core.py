@@ -6,14 +6,14 @@ import random
 
 class Graphe:
     # Classe représentant un graphe via une matrice d'adjacence.
-    # 
+
     # Attributes:
     #     matrice_adjacence (List[List[int]]): Matrice carrée représentant les arêtes
     #     ordre (int): Nombre de sommets dans le graphe
     
     def __init__(self, n: int = 0):
         # Initialise un graphe avec n sommets sans arêtes.
-        # 
+
         # Args:
         #     n (int): Nombre de sommets initiaux (défaut 0)
         self.matrice_adjacence = [[0] * n for _ in range(n)]
@@ -21,11 +21,11 @@ class Graphe:
 
     def ajouter_arete(self, sommet1: int, sommet2: int) -> None:
         # Ajoute une arête entre deux sommets (non orienté).
-        # 
+
         # Args:
         #     sommet1 (int): Index du premier sommet (0-based)
         #     sommet2 (int): Index du second sommet (0-based)
-        #     
+
         # Raises:
         #     IndexError: Si un sommet n'existe pas
         if sommet1 >= self.ordre or sommet2 >= self.ordre:
@@ -36,7 +36,7 @@ class Graphe:
 
     def supprimer_arete(self, sommet1: int, sommet2: int) -> None:
         # Supprime une arête entre deux sommets.
-        # 
+
         # Args:
         #     sommet1 (int): Index du premier sommet (0-based)
         #     sommet2 (int): Index du second sommet (0-based)
@@ -53,10 +53,10 @@ class Graphe:
 
     def supprimer_sommet(self, sommet: int) -> None:
         # Supprime un sommet et toutes ses arêtes incidentes.
-        # 
+
         # Args:
         #     sommet (int): Index du sommet à supprimer (0-based)
-        #     
+
         # Raises:
         #     IndexError: Si le sommet n'existe pas
         if sommet >= self.ordre:
@@ -75,24 +75,24 @@ class Graphe:
 
     def calculer_ordre(self) -> int:
         # Retourne l'ordre du graphe (nombre de sommets).
-        # 
+
         # Returns:
         #     int: Nombre de sommets
         return self.ordre
 
     def calculer_degres(self) -> List[int]:
         # Calcule le degré de chaque sommet.
-        # 
+
         # Returns:
         #     List[int]: Liste des degrés pour chaque sommet
         return [sum(ligne) for ligne in self.matrice_adjacence]
 
     def voisinage(self, sommet: int) -> List[int]:
         # Retourne la liste des voisins d'un sommet.
-        # 
+
         # Args:
         #     sommet (int): Index du sommet (0-based)
-        #     
+  
         # Returns:
         #     List[int]: Indices des sommets voisins
         if sommet >= self.ordre:
@@ -101,12 +101,12 @@ class Graphe:
 
     def existe_chemin_longueur(self, depart: int, arrivee: int, longueur: int) -> bool:
         # Vérifie s'il existe un chemin de longueur exacte L entre deux sommets.
-        # 
+
         # Args:
         #     depart (int): Sommet de départ
         #     arrivee (int): Sommet d'arrivée
         #     longueur (int): Longueur exacte recherchée
-        #     
+  
         # Returns:
         #     bool: True si un tel chemin existe, False sinon
         if longueur == 0:
@@ -124,7 +124,7 @@ class Graphe:
 
     def trouver_cycle_eulerien(self) -> Optional[List[int]]:
         # Trouve un cycle eulérien si le graphe en possède un.
-        # 
+
         # Returns:
         #     Optional[List[int]]: Liste des sommets du cycle ou None si inexistant
         degres = self.calculer_degres()
@@ -150,7 +150,7 @@ class Graphe:
 
     def trouver_chemin_eulerien(self) -> Optional[List[int]]:
         # Trouve un chemin eulérien si le graphe en possède un.
-        # 
+
         # Returns:
         #     Optional[List[int]]: Liste des sommets du chemin ou None si inexistant
         degres = self.calculer_degres()
